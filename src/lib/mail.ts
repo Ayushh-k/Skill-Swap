@@ -10,18 +10,13 @@ const transporter = nodemailer.createTransport({
 
 // Verify connection configuration
 if (process.env.NODE_ENV !== "production") {
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error("Mail Transporter Error:", error);
-    } else {
-      console.log("Mail Transporter is ready to send emails");
-    }
+  transporter.verify((error) => {
+    if (error) console.error("Mail Transporter Error:", error);
   });
 }
 
 export async function sendOTP(email: string, otp: string) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error("CRITICAL: EMAIL_USER or EMAIL_PASS environment variables are missing!");
     throw new Error("Email service is not configured.");
   }
   const mailOptions = {
