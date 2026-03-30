@@ -17,8 +17,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           {/* Brand Section */}
           <div className="space-y-4">
-            <Link href="/" className="font-heading text-xl font-bold tracking-tight text-white flex items-center gap-2 group">
-              <img src="/logo.png" alt="Skill-Swap Logo" className="h-14 sm:h-16 w-auto object-contain group-hover:scale-105 transition-transform" />
+            <Link href="/" className="font-heading text-xl font-bold tracking-tight text-white flex items-center gap-2 group mb-6">
+              <img src="/logo.png" alt="Skill-Swap Logo" className="h-20 sm:h-24 w-auto object-contain scale-[2.2] sm:scale-[3.2] origin-left transition-transform ml-8 sm:ml-12" />
             </Link>
             <p className="text-sm text-foreground/60 leading-relaxed max-w-xs">
               The world's premium peer-to-peer knowledge exchange platform. Build connections, share wisdom, and grow without boundaries.
