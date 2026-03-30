@@ -50,7 +50,6 @@ export default function SignupPage() {
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
-      console.log("DEBUG: Sending OTP request...");
       const res = await fetch("/api/auth/otp/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,7 +65,6 @@ export default function SignupPage() {
       toast.success("Verification code sent to your email!");
       setStep(2);
     } catch (err: any) {
-      console.error("DEBUG OTP Error:", err);
       if (err.name === "AbortError") {
         toast.error("Request timed out after 60 seconds. This may happen if the server is waking up. Please try one more time.");
       } else {
