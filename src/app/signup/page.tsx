@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,6 @@ import { signIn } from "next-auth/react";
 
 export default function SignupPage() {
   const router = useRouter();
-  
-  // Data State
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   
   // Data State
   const [name, setName] = useState("");
@@ -205,12 +199,6 @@ export default function SignupPage() {
               Already have an account? <Link href="/login" className="text-white hover:text-accent-indigo font-medium font-heading">Log in</Link>
             </p>
           </motion.div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
         </div>
       </div>
     </div>
