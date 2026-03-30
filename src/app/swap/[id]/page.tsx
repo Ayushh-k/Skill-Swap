@@ -250,8 +250,7 @@ export default function SwapChat() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <div className="min-h-[calc(100vh-64px)] bg-background flex flex-col pt-16">
       <main className="container mx-auto px-4 py-8 flex-1 flex flex-col max-w-5xl relative z-10">
         <div className="absolute top-[10%] left-[-10%] w-[30vw] h-[30vw] min-w-[300px] rounded-full bg-accent-indigo/10 blur-[150px] -z-10 pointer-events-none" />
 

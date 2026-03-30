@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { ArrowRight, Sparkles, Zap, ShieldCheck, UserPlus, Search, MessageSquare, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
@@ -26,9 +24,7 @@ const itemVariants = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
-      <div className="relative overflow-hidden flex-1">
+    <div className="relative overflow-hidden flex-1">
         {/* Background Gradients */}
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-indigo/20 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent-teal/20 blur-[120px] pointer-events-none" />
@@ -171,8 +167,6 @@ export default function Home() {
           </div>
         </main>
       </div>
-      <Footer />
-    </div>
   );
 }
 

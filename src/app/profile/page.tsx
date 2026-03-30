@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "@/components/layout/Navbar";
-import { Loader2, Settings, Mail, BookOpen, Star } from "lucide-react";
+import { motion } from "framer-motion";
+import { Loader2, Settings, Mail, BookOpen, Star, Edit2, CheckCircle, Globe, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,149 +88,160 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Navbar />
-      <main className="container mx-auto px-4 py-12 relative flex-1 flex flex-col items-center">
+    <div className="container mx-auto px-4 py-12 relative flex-1 flex flex-col items-center">
         <div className="absolute top-[10%] left-[20%] w-[30vw] h-[30vw] min-w-[300px] rounded-full bg-accent-indigo/10 blur-[150px] -z-10 pointer-events-none" />
         
         <h1 className="font-heading text-3xl md:text-4xl font-bold text-white tracking-tight mb-8 w-full max-w-2xl text-center sm:text-left">Your Profile</h1>
 
         {isLoading ? (
           <div className="py-24"><Loader2 className="h-8 w-8 animate-spin text-accent-indigo" /></div>
-        ) : !profile ? (
-          <p className="text-foreground/70">Failed to load profile.</p>
+        ) : profile ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-2xl"
+          >
+            <Card className="p-8 bg-surface/40 border-white/10 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4">
+                <Button variant="ghost" size="sm" className="hover:bg-white/10 text-white/60 hover:text-white" onClick={() => setIsEditing(true)}>
+                  <Edit2 className="w-5 h-5" />
+                </Button>
+              </div>
+
+              <div className="flex flex-col items-center sm:items-start sm:flex-row gap-8 mb-10">
+                <div className="relative group/avatar">
+                  <div className="h-28 w-28 rounded-2xl bg-gradient-to-br from-accent-indigo to-accent-teal flex items-center justify-center text-white font-bold text-4xl border border-white/10 shadow-inner overflow-hidden">
+                    {profile.avatar ? <img src={profile.avatar} className="w-full h-full object-cover" /> : (profile.name?.[0] || "?")}
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-accent-teal rounded-lg p-1.5 shadow-lg border border-white/10">
+                    <CheckCircle className="w-4 h-4 text-background" />
+                  </div>
+                </div>
+
+                <div className="text-center sm:text-left pt-2">
+                  <h2 className="text-3xl font-bold text-white tracking-tight">{profile.name}</h2>
+                  <p className="text-foreground/50 font-medium mb-4">{profile.email}</p>
+                  <div className="flex flex-wrap justify-center sm:justify-start gap-4 text-sm">
+                    <div className="flex items-center gap-1.5 text-foreground/70">
+                      <div className="h-2 w-2 rounded-full bg-accent-teal" />
+                      Expert Swapper
+                    </div>
+                    <div className="flex items-center gap-1.5 text-foreground/70">
+                      <div className="h-2 w-2 rounded-full bg-accent-indigo" />
+                      {profile.skillsOffered?.length || 0} Skills Shared
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div className="bg-white/5 p-6 rounded-2xl border border-white/5">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-[0.2em] mb-4 opacity-50">Biography</h4>
+                  <p className="text-foreground/80 leading-relaxed italic line-clamp-3">
+                    {profile.bio || "No bio added yet. Tell people about your expertise and what makes you a great swap partner!"}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-accent-teal uppercase tracking-[0.2em] opacity-50">Mastery (Teaches)</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.skillsOffered?.map((s: string, i: number) => (
+                        <span key={i} className="px-3 py-1 text-xs rounded-lg bg-accent-teal/10 text-accent-teal border border-accent-teal/20 font-medium">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold text-accent-indigo uppercase tracking-[0.2em] opacity-50">Interests (Wants to Learn)</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.skillsWanted?.map((s: string, i: number) => (
+                        <span key={i} className="px-3 py-1 text-xs rounded-lg bg-accent-indigo/10 text-accent-indigo border border-accent-indigo/20 font-medium">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-white/5 flex flex-wrap gap-4 justify-between items-center text-xs text-foreground/40">
+                <p>Member since {new Date().getFullYear()}</p>
+                <div className="flex items-center gap-6">
+                  <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> Verified Expert</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Secure Account</span>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         ) : (
-          <Card className="w-full max-w-2xl p-5 sm:p-8 bg-surface/30 backdrop-blur-md shadow-2xl relative overflow-hidden transition-all duration-300 border-white/5">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 border-b border-white/10 pb-6 sm:pb-8 mb-6 sm:mb-8">
-              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-gradient-to-br from-accent-indigo/60 to-accent-teal/60 flex flex-shrink-0 items-center justify-center text-white font-heading font-bold text-3xl sm:text-4xl uppercase border border-white/20 shadow-lg relative overflow-hidden">
-                {profile.avatar ? (
-                  <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  profile.name[0]
-                )}
-              </div>
-              <div className="space-y-1 sm:space-y-2 text-center sm:text-left flex-1 min-w-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-white truncate">{profile.name}</h2>
-                <div className="flex items-center justify-center sm:justify-start text-xs sm:text-sm text-foreground/60 truncate">
-                  <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" /> {profile.email}
-                </div>
-                {profile.bio && <p className="text-xs sm:text-sm mt-3 text-foreground/80 leading-relaxed max-w-md line-clamp-3">{profile.bio}</p>}
-                {!profile.bio && <p className="text-xs text-foreground/40 italic">No bio provided.</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div>
-                <div className="flex items-center gap-2 mb-4 text-accent-teal">
-                  <Star className="w-5 h-5" />
-                  <h3 className="font-semibold text-lg text-white">Skills to Offer</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.skillsOffered?.length > 0 ? (
-                    profile.skillsOffered.map((skill: string) => (
-                      <span key={skill} className="px-3 py-1.5 text-sm rounded-md bg-accent-teal/10 text-accent-teal border border-accent-teal/20">
-                        {skill}
-                      </span>
-                    ))
-                  ) : <span className="text-sm text-foreground/50 italic">List skills you can teach others...</span>}
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-4 text-accent-indigo">
-                  <BookOpen className="w-5 h-5" />
-                  <h3 className="font-semibold text-lg text-white">Wants to Learn</h3>
-                </div>
-                 <div className="flex flex-wrap gap-2">
-                  {profile.skillsWanted?.length > 0 ? (
-                    profile.skillsWanted.map((skill: string) => (
-                      <span key={skill} className="px-3 py-1.5 text-sm rounded-md bg-accent-indigo/10 text-accent-indigo border border-accent-indigo/20">
-                        {skill}
-                      </span>
-                    ))
-                  ) : <span className="text-sm text-foreground/50 italic">List skills you want to learn...</span>}
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-10 p-4 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-white">Account Settings</p>
-                <p className="text-xs text-foreground/60 hidden sm:block">Manage your profile details and skills</p>
-              </div>
-              <Button variant="outline" className="gap-2" onClick={() => setIsEditing(true)}>
-                <Settings className="w-4 h-4" /> Edit Profile
-              </Button>
-            </div>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-20 text-foreground/40">
+            <Mail className="w-12 h-12 mb-4 opacity-20" />
+            <p className="font-heading text-xl">Profile unreachable.</p>
+          </div>
         )}
-      </main>
 
-      <Modal isOpen={isEditing} onClose={() => setIsEditing(false)} title="Edit Profile">
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="flex flex-col items-center justify-center mb-6">
-            <label className="relative cursor-pointer group rounded-full overflow-hidden h-24 w-24 border border-white/10 shadow-lg flex items-center justify-center bg-gradient-to-br from-accent-indigo to-accent-teal text-white font-bold text-4xl uppercase shrink-0 transition-transform hover:scale-105">
-              {avatarUrl ? (
-                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                 name?.[0] || "?"
-              )}
-              <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-xs font-semibold backdrop-blur-sm transition-all text-center leading-tight">
-                Change Photo
-              </div>
-              <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-            </label>
-            <p className="text-xs text-foreground/40 mt-2">Max limit: 2MB</p>
-          </div>
+        <Modal isOpen={isEditing} onClose={() => setIsEditing(false)} title="Edit Profile">
+          <form onSubmit={handleSave} className="space-y-4 pt-4">
+            <div className="flex flex-col items-center justify-center mb-6">
+              <label className="relative cursor-pointer group rounded-full overflow-hidden h-24 w-24 border border-white/10 shadow-lg flex items-center justify-center bg-gradient-to-br from-accent-indigo to-accent-teal text-white font-bold text-4xl uppercase shrink-0 transition-transform hover:scale-105">
+                {avatarUrl ? (
+                   <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                   name?.[0] || "?"
+                )}
+                <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-xs font-semibold backdrop-blur-sm transition-all text-center leading-tight">
+                  Change Photo
+                </div>
+                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+              </label>
+              <p className="text-xs text-foreground/40 mt-2">Max limit: 2MB</p>
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white shadow-sm">Full Name:</label>
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="bg-white/5 border-white/10"
-              maxLength={50}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white shadow-sm">Bio:</label>
-            <textarea
-              className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-surface/30 px-3 py-2 text-sm text-foreground placeholder:text-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo transition-colors"
-              placeholder="Tell others about your background..."
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              maxLength={500}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white shadow-sm">Skills to Offer (comma-separated):</label>
-            <Input
-              type="text"
-              placeholder="React, UI Design, Marketing"
-              value={skillsOfferedInput}
-              onChange={(e) => setSkillsOfferedInput(e.target.value)}
-              className="bg-white/5 border-white/10"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white shadow-sm">Skills you want (comma-separated):</label>
-            <Input
-              type="text"
-              placeholder="Python, Backend, AWS"
-              value={skillsWantedInput}
-              onChange={(e) => setSkillsWantedInput(e.target.value)}
-              className="bg-white/5 border-white/10"
-            />
-          </div>
-          <div className="flex gap-3 justify-end pt-4">
-            <Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>Cancel</Button>
-            <Button type="submit" isLoading={isSaving} className="bg-accent-indigo hover:bg-accent-indigo/90">Save Changes</Button>
-          </div>
-        </form>
-      </Modal>
-
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-white mb-2 block">Full Name:</label>
+              <Input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="bg-white/5 border-white/10"
+                maxLength={50}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-white mb-2 block">Bio:</label>
+              <textarea
+                className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground placeholder:text-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo transition-colors"
+                placeholder="Tell others about your background..."
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-white mb-2 block">Skills to Offer (comma-separated):</label>
+              <Input
+                type="text"
+                placeholder="React, UI Design, Marketing"
+                value={skillsOfferedInput}
+                onChange={(e) => setSkillsOfferedInput(e.target.value)}
+                className="bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-white mb-2 block">Skills you want (comma-separated):</label>
+              <Input
+                type="text"
+                placeholder="Python, Backend, AWS"
+                value={skillsWantedInput}
+                onChange={(e) => setSkillsWantedInput(e.target.value)}
+                className="bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="flex gap-3 justify-end pt-4">
+              <Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>Cancel</Button>
+              <Button type="submit" isLoading={isSaving} className="bg-accent-indigo hover:bg-accent-indigo/90">Save Changes</Button>
+            </div>
+          </form>
+        </Modal>
     </div>
-  )
+  );
 }

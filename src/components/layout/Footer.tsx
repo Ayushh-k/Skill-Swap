@@ -34,9 +34,9 @@ export default function Footer() {
             <div className="space-y-4">
               <h4 className="text-sm font-bold text-white uppercase tracking-wider">Support</h4>
               <ul className="space-y-2 text-sm text-foreground/50">
-                <li><a href="#" className="hover:text-accent-teal transition-colors">Guidelines</a></li>
-                <li><a href="#" className="hover:text-accent-teal transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-accent-teal transition-colors">Terms</a></li>
+                <li><Link href="/guidelines" className="hover:text-accent-teal transition-colors">Guidelines</Link></li>
+                <li><Link href="/privacy" className="hover:text-accent-teal transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-accent-teal transition-colors">Terms</Link></li>
               </ul>
             </div>
           </div>

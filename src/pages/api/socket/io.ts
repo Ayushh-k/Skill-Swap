@@ -78,6 +78,20 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
         } catch (err) {}
       });
 
+      socket.on("join_user", (userId: string) => {
+        socket.join(`user_${userId}`);
+      });
+
+      socket.on("new_swap_request", (data: any) => {
+        // Emit to the receiver's private room
+        io.to(`user_${data.receiverId}`).emit("notif_new_swap", data);
+      });
+
+      socket.on("swap_status_updated", (data: any) => {
+        // Notify the requester that their request was accepted/rejected
+        io.to(`user_${data.requesterId}`).emit("notif_swap_updated", data);
+      });
+
       socket.on("disconnect", () => {});
     });
   }
