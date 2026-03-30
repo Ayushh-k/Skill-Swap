@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Sparkles, Eye, EyeOff } from "lucide-react";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { update } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +32,7 @@ export default function LoginPage() {
       if (res?.error) {
         toast.error(res.error);
       } else {
+        await update(); // Force session refresh
         toast.success("Welcome back!");
         router.push("/dashboard");
         router.refresh();

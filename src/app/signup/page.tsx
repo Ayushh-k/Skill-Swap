@@ -8,10 +8,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Zap, Eye, EyeOff, ShieldCheck, Mail, ArrowRight } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { update } = useSession();
   
   // Data State
   const [name, setName] = useState("");
@@ -56,6 +57,7 @@ export default function SignupPage() {
         toast.error("Account created, but automatic login failed. Please log in manually.");
         router.push("/login");
       } else {
+        await update(); // Force session refresh
         toast.success("Account created and logged in!");
         router.push("/dashboard");
         router.refresh();
