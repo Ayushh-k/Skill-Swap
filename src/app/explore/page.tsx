@@ -29,6 +29,7 @@ export default function Explore() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
 
   // Swap Form State
@@ -182,42 +183,41 @@ export default function Explore() {
           {filteredUsers.map((user) => (
             <Card key={user._id} className="group bg-surface/40 border-white/5 hover:border-accent-teal/30 hover:bg-surface/60 transition-all duration-300 flex flex-col h-full overflow-hidden">
               <div className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-accent-indigo/20 to-accent-teal/20 flex items-center justify-center text-white font-bold text-2xl border border-white/10 group-hover:scale-110 transition-transform duration-300 overflow-hidden relative">
-                     {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : (user.name[0] || "?")}
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-white truncate leading-tight mb-1">{user.name}</h3>
-                    <p className="text-xs text-foreground/40 font-medium truncate">{user.email}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-5 flex-1">
-                  <div>
-                    <h4 className="text-[10px] font-bold text-accent-teal uppercase tracking-widest mb-2 opacity-80">Teaches</h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {user.skillsOffered && user.skillsOffered.length > 0 ? (
-                        user.skillsOffered.map((s, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded-md bg-accent-teal/5 text-accent-teal text-[10px] border border-accent-teal/10">{s}</span>
-                        ))
-                      ) : <span className="text-[10px] text-foreground/30 italic">Not listed</span>}
+                <div 
+                  className="cursor-pointer space-y-4 flex-1"
+                  onClick={() => { setSelectedUser(user); setIsProfileModalOpen(true); }}
+                >
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-accent-indigo/20 to-accent-teal/20 flex items-center justify-center text-white font-bold text-2xl border border-white/10 group-hover:scale-110 transition-transform duration-300 overflow-hidden relative">
+                       {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover shadow-inner" alt={user.name} /> : (user.name[0] || "?")}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-bold text-white truncate leading-tight mb-1">{user.name}</h3>
+                      <p className="text-xs text-foreground/40 font-medium truncate">{user.email}</p>
                     </div>
                   </div>
 
-                  <div>
-                    <h4 className="text-[10px] font-bold text-accent-indigo uppercase tracking-widest mb-2 opacity-80">Wants to Learn</h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {user.skillsWanted && user.skillsWanted.length > 0 ? (
-                        user.skillsWanted.map((s, i) => (
-                          <span key={i} className="px-2 py-0.5 rounded-md bg-accent-indigo/5 text-accent-indigo text-[10px] border border-accent-indigo/10">{s}</span>
-                        ))
-                      ) : <span className="text-[10px] text-foreground/30 italic">Not listed</span>}
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-[10px] font-bold text-accent-teal uppercase tracking-widest mb-2 opacity-80">Teaches</h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {user.skillsOffered && user.skillsOffered.length > 0 ? (
+                          user.skillsOffered.slice(0, 3).map((s, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-md bg-accent-teal/5 text-accent-teal text-[10px] border border-accent-teal/10">{s}</span>
+                          ))
+                        ) : <span className="text-[10px] text-foreground/30 italic">Not listed</span>}
+                        {user.skillsOffered?.length > 3 && <span className="text-[10px] text-foreground/30">+{user.skillsOffered.length - 3} more</span>}
+                      </div>
                     </div>
+
+                    <p className="text-xs text-foreground/60 line-clamp-2 leading-relaxed">
+                      {user.bio || "Building a better world through collaborative learning."}
+                    </p>
                   </div>
                 </div>
 
                 <Button 
-                  className="w-full mt-6 bg-gradient-to-r from-accent-indigo to-accent-teal hover:opacity-90 text-white font-bold h-11 border-0 shadow-lg group-hover:shadow-accent-teal/20 transition-all"
+                  className="w-full mt-6 bg-gradient-to-r from-accent-indigo to-accent-teal hover:opacity-90 text-white font-bold h-11 border-0 shadow-lg group-hover:shadow-accent-teal/20 transition-all z-10"
                   onClick={() => { setSelectedUser(user); setIsModalOpen(true); }}
                 >
                   Swap Skills
@@ -227,6 +227,65 @@ export default function Explore() {
           ))}
         </div>
       )}
+
+      <Modal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+        title="Professor Profile"
+      >
+        <div className="space-y-8 pt-4">
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-accent-indigo/20 to-accent-teal/20 flex items-center justify-center text-white font-bold text-4xl border border-white/10 shadow-2xl relative overflow-hidden">
+               {selectedUser?.avatar ? <img src={selectedUser.avatar} className="w-full h-full object-cover" /> : (selectedUser?.name[0] || "?")}
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-white">{selectedUser?.name}</h3>
+              <p className="text-foreground/40 text-sm">{selectedUser?.email}</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+              <h4 className="text-xs font-bold text-accent-teal uppercase tracking-widest mb-3">About the Expert</h4>
+              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                {selectedUser?.bio || "This user prefers to keep their expertise a mystery until the swap begins."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                <h4 className="text-xs font-bold text-accent-indigo uppercase tracking-widest mb-3">Skills Offered</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedUser?.skillsOffered?.map((s, i) => (
+                    <span key={i} className="px-2 py-0.5 rounded-md bg-accent-indigo/10 text-accent-indigo text-[10px] border border-accent-indigo/20">{s}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                <h4 className="text-xs font-bold text-accent-teal uppercase tracking-widest mb-3">Interests</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedUser?.skillsWanted?.map((s, i) => (
+                    <span key={i} className="px-2 py-0.5 rounded-md bg-accent-teal/10 text-accent-teal text-[10px] border border-accent-teal/20">{s}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-6 border-t border-white/5">
+            <Button variant="ghost" className="flex-1" onClick={() => setIsProfileModalOpen(false)}>Close</Button>
+            <Button 
+               className="flex-1" 
+               onClick={() => {
+                 setIsProfileModalOpen(false);
+                 setIsModalOpen(true);
+               }}
+            >
+              Request Swap
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Swap Request to ${selectedUser?.name}`}>
         <form onSubmit={handleRequestSwap} className="space-y-4 pt-4">
