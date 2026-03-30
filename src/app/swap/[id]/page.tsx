@@ -39,6 +39,7 @@ export default function SwapChat() {
   const [peer, setPeer] = useState<{ name: string; _id: string; avatar?: string; email?: string; bio?: string; skillsOffered?: string[]; skillsWanted?: string[] } | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Chat Action States
@@ -51,7 +52,9 @@ export default function SwapChat() {
   const [callType, setCallType] = useState<"video" | "audio">("video");
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   };
 
   // ---- Action handlers use refs to avoid stale closures ----
@@ -288,7 +291,7 @@ export default function SwapChat() {
         </div>
 
         <Card className="flex-1 flex flex-col min-h-[60vh] max-h-[75vh] bg-surface/30 border border-white/10 relative overflow-hidden backdrop-blur-xl mb-4">
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-3 scroll-smooth">
+          <div ref={scrollContainerRef} className="flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col gap-3 scroll-smooth">
             {messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-foreground/50 italic text-sm space-y-2">
                 <div className="p-4 rounded-full bg-white/5"><Send className="w-8 h-8 text-accent-teal opacity-50" /></div>

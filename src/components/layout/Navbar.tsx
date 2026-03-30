@@ -173,7 +173,7 @@ export default function Navbar() {
                   <div className="sm:hidden flex items-center gap-2">
                     <Link href="/profile">
                       <div className="w-9 h-9 rounded-full border border-white/10 overflow-hidden bg-gradient-to-br from-accent-indigo to-accent-teal flex items-center justify-center text-white text-xs font-bold uppercase">
-                        {user.avatar ? <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" /> : user.name?.[0] || 'U'}
+                        {displayAvatar ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" /> : user.name?.[0] || 'U'}
                       </div>
                     </Link>
                     <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="px-2 text-white">
