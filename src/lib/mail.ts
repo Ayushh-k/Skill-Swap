@@ -1,21 +1,28 @@
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+let transporter: nodemailer.Transporter | null = null;
 
-// Verify connection configuration
-if (process.env.NODE_ENV !== "production") {
-  transporter.verify((error) => {
-    if (error) console.error("Mail Transporter Error:", error);
+function getTransporter() {
+  if (transporter) return transporter;
+  
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error("CRITICAL: EMAIL_USER or EMAIL_PASS environment variables are missing!");
+    throw new Error("Email service is not configured.");
+  }
+
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
   });
+
+  return transporter;
 }
 
 export async function sendOTP(email: string, otp: string) {
+  const mailTransporter = getTransporter();
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     throw new Error("Email service is not configured.");
   }
@@ -43,5 +50,5 @@ export async function sendOTP(email: string, otp: string) {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  await mailTransporter.sendMail(mailOptions);
 }
