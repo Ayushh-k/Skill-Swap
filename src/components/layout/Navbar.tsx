@@ -42,6 +42,32 @@ export default function Navbar() {
 
   useEffect(() => {
     if (user) {
+      // Plays a pleasant double-chime using native Web Audio API
+      const playNotificationSound = () => {
+        try {
+          const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+          if (!AudioContext) return;
+          const ctx = new AudioContext();
+          
+          const playOsci = (freq: number, startTime: number) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+            osc.start(startTime);
+            osc.stop(startTime + 0.4);
+          };
+          
+          playOsci(523.25, ctx.currentTime); // C5
+          playOsci(659.25, ctx.currentTime + 0.15); // E5
+        } catch(e) {}
+      };
+
       // Fetch unread notifications
       const fetchUnread = () => {
         fetch("/api/messages/unread")
@@ -54,6 +80,7 @@ export default function Navbar() {
                  if (!isInitialFetch.current) {
                    if (data.count > prev.count) {
                      newDismissed = 0; // New message arrived, reset badge
+                     playNotificationSound();
                    } else if (data.count < prev.count) {
                      newDismissed = Math.min(newDismissed, data.count); // Messages were read
                    }
@@ -134,7 +161,7 @@ export default function Navbar() {
                     </Button>
                     
                     {showNotifs && (
-                      <div className="absolute top-12 -right-12 sm:right-0 w-[85vw] max-w-[320px] sm:w-80 bg-[#0A0A0A] border rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 z-[100] animate-in fade-in slide-in-from-top-2 duration-200" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+                      <div className="absolute top-12 right-0 w-[280px] sm:w-80 bg-[#0A0A0A] border rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 z-[100] animate-in fade-in slide-in-from-top-2 duration-200" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
                         <h3 className="text-sm font-bold text-white border-b border-white/10 pb-2">Unread Messages</h3>
                         {unread.messages.length === 0 ? (
                           <p className="text-xs text-foreground/50 text-center py-4">No new notifications</p>

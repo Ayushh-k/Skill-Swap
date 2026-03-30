@@ -149,7 +149,27 @@ export default function SwapChat() {
       if (message.senderId !== currentId) {
         socketInstance.emit("mark_read", { swapId: id, userId: currentId });
         toast(`New Message: ${message.text.substring(0, 30)}...`);
-        try { new Audio('/beep.mp3').play().catch(() => {}); } catch (e) {}
+        try {
+          const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioContext) {
+            const ctx = new AudioContext();
+            const playOsci = (freq: number, startTime: number) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "sine";
+              osc.frequency.value = freq;
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              gain.gain.setValueAtTime(0, startTime);
+              gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+              gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+              osc.start(startTime);
+              osc.stop(startTime + 0.4);
+            };
+            playOsci(523.25, ctx.currentTime);
+            playOsci(659.25, ctx.currentTime + 0.15);
+          }
+        } catch(e) {}
       }
       setTimeout(scrollToBottom, 50);
     });
