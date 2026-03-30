@@ -48,18 +48,15 @@ export default function SignupPage() {
       
       // Auto-login after successful signup using NextAuth
       const signInRes = await signIn("credentials", {
-        redirect: false,
+        redirect: true,
         email,
         password,
+        callbackUrl: "/dashboard"
       });
 
       if (signInRes?.error) {
         toast.error("Account created, but automatic login failed. Please log in manually.");
         router.push("/login");
-      } else {
-        toast.success("Account created and logged in!");
-        router.push("/dashboard");
-        router.refresh();
       }
     } catch (err: any) {
       toast.error(err.message);

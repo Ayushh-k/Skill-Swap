@@ -24,17 +24,15 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const res = await signIn("credentials", {
-        redirect: false,
+        redirect: true,
         email,
         password,
+        callbackUrl: "/dashboard"
       });
       
+      // If redirect: true, signIn will only return if there was an error
       if (res?.error) {
         toast.error(res.error);
-      } else {
-        toast.success("Welcome back!");
-        router.push("/dashboard");
-        router.refresh();
       }
     } catch (err: any) {
       toast.error(err.message || "An error occurred");
