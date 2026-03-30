@@ -161,7 +161,7 @@ export default function Navbar() {
                     </Button>
                     
                     {showNotifs && (
-                      <div className="absolute top-12 right-0 w-[280px] sm:w-80 bg-[#0A0A0A] border rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 z-[100] animate-in fade-in slide-in-from-top-2 duration-200" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+                      <div className="fixed top-20 left-4 right-4 w-auto sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-[#0A0A0A] border rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 z-[100] animate-in fade-in slide-in-from-top-2 duration-200" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
                         <h3 className="text-sm font-bold text-white border-b border-white/10 pb-2">Unread Messages</h3>
                         {unread.messages.length === 0 ? (
                           <p className="text-xs text-foreground/50 text-center py-4">No new notifications</p>
