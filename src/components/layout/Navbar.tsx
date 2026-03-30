@@ -118,10 +118,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center flex-row justify-between px-4">
         <Link href="/" className="font-heading text-xl font-bold tracking-tight text-white flex items-center gap-2 group">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-accent-indigo to-accent-teal flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-shadow">
-            <span className="text-white text-base">S</span>
-          </div>
-          <span className="block">Skill-Swap</span>
+          <img src="/logo.png" alt="Skill-Swap Logo" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform" />
         </Link>
         <div className="flex items-center gap-2">
           {/* Desktop Links */}

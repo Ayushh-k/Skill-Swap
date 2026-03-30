@@ -18,10 +18,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="space-y-4">
             <Link href="/" className="font-heading text-xl font-bold tracking-tight text-white flex items-center gap-2 group">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-accent-indigo to-accent-teal flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-shadow">
-                <span className="text-white text-base">S</span>
-              </div>
-              <span>Skill-Swap</span>
+              <img src="/logo.png" alt="Skill-Swap Logo" className="h-8 w-auto object-contain group-hover:scale-105 transition-transform" />
             </Link>
             <p className="text-sm text-foreground/60 leading-relaxed max-w-xs">
               The world's premium peer-to-peer knowledge exchange platform. Build connections, share wisdom, and grow without boundaries.
