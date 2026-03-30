@@ -29,6 +29,10 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
+  useEffect(() => {
+    alert("Debug Signup Page Loaded - Version 2026");
+  }, []);
+
   async function handleSendOtp() {
     // Extreme diagnostic alert
     alert("Starting Email Verification for: " + email);
@@ -247,7 +251,7 @@ export default function SignupPage() {
                     className="w-full h-12 bg-gradient-to-r from-accent-teal to-accent-indigo border-0 hover:opacity-90 shadow-[0_0_20px_rgba(20,184,166,0.2)] transition-all mt-4" 
                     isLoading={isSendingOtp}
                   >
-                    Verify Email <ArrowRight className="w-4 h-4 ml-2" />
+                    DEBUG: CLICK THIS NOW <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </form>
 
