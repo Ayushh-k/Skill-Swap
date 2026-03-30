@@ -30,6 +30,9 @@ export default function SignupPage() {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   async function handleSendOtp() {
+    // Extreme diagnostic alert
+    alert("Starting Email Verification for: " + email);
+
     if (!name || !email || !password || !confirmPassword) {
       toast.error("Please fill all fields first.");
       return;
@@ -40,22 +43,32 @@ export default function SignupPage() {
     }
 
     setIsSendingOtp(true);
-    console.log("DEBUG: Attempting to send OTP to", email);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
+      console.log("DEBUG: Sending OTP request...");
       const res = await fetch("/api/auth/otp/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       });
-      console.log("DEBUG: OTP Response Status:", res.status);
+
+      clearTimeout(timeoutId);
       const data = await res.json();
-      console.log("DEBUG: OTP Response Data:", data);
+      
       if (!res.ok) throw new Error(data.message || "Failed to send OTP");
       
       toast.success("Verification code sent to your email!");
       setStep(2);
     } catch (err: any) {
-      toast.error(err.message);
+      console.error("DEBUG OTP Error:", err);
+      if (err.name === "AbortError") {
+        toast.error("Request timed out after 15 seconds. Please try again.");
+      } else {
+        toast.error(err.message || "Network error. Please try again.");
+      }
     } finally {
       setIsSendingOtp(false);
     }
