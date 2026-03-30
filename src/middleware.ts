@@ -1,42 +1,37 @@
+import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super-secret-key-change-in-prod";
+export default withAuth(
+  function middleware(req) {
+    // Redirect authenticated users away from auth pages
+    const isAuthPage =
+      req.nextUrl.pathname.startsWith("/login") ||
+      req.nextUrl.pathname.startsWith("/signup");
 
-export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
-  
-  const protectedPaths = ["/dashboard", "/explore", "/swap"];
-  
-  const isProtectedPath = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  if (isProtectedPath) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
+    if (isAuthPage) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
-    try {
-      await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
-      return NextResponse.next();
-    } catch (e) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
+  },
+  {
+    callbacks: {
+      authorized: ({ req, token }) => {
+        const isAuthPage =
+          req.nextUrl.pathname.startsWith("/login") ||
+          req.nextUrl.pathname.startsWith("/signup");
+          
+        if (isAuthPage) {
+          return true; // Let them through to get redirected by middleware function above
+        }
+        
+        // Only allow access to protected routes if we have a token
+        return !!token;
+      },
+    },
+    pages: {
+      signIn: "/login",
+    },
   }
-
-  // Redirect users who are logged in away from auth pages
-  if (token && (request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup"))) {
-    try {
-      await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    } catch (e) {
-      // invalid token, just let them see the login page
-    }
-  }
-
-  return NextResponse.next();
-}
+);
 
 export const config = {
   matcher: ["/dashboard/:path*", "/explore/:path*", "/swap/:path*", "/login", "/signup"],
