@@ -45,9 +45,21 @@ export default function SignupPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create account");
       
-      toast.success("Account created successfully!");
-      router.push("/dashboard");
-      router.refresh();
+      // Auto-login after successful signup using NextAuth
+      const signInRes = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (signInRes?.error) {
+        toast.error("Account created, but automatic login failed. Please log in manually.");
+        router.push("/login");
+      } else {
+        toast.success("Account created and logged in!");
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (err: any) {
       toast.error(err.message);
     } finally {

@@ -22,18 +22,21 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to login");
-      toast.success("Welcome back!");
-      router.push("/dashboard");
-      router.refresh();
+      
+      if (res?.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Welcome back!");
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || "An error occurred");
     } finally {
       setIsLoading(false);
     }

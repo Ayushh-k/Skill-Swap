@@ -1,8 +1,10 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AzureADProvider from "next-auth/providers/azure-ad";
+import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from "@/lib/db";
 import { User } from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,10 +17,49 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET || "",
       tenantId: process.env.AZURE_AD_TENANT_ID || "common",
     }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Invalid credentials");
+        }
+        await dbConnect();
+        const user = await User.findOne({ email: credentials.email }).select("+password");
+        if (!user) {
+          throw new Error("Invalid credentials");
+        }
+        
+        // If user logged in with OAuth before, they might not have a password
+        if (!user.password) {
+          throw new Error("Please log in with your social account.");
+        }
+
+        const isMatch = await bcrypt.compare(credentials.password, user.password as string);
+        if (!isMatch) {
+          throw new Error("Invalid credentials");
+        }
+        
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          image: user.avatar,
+        };
+      }
+    }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
       if (!user.email) return false;
+      
+      // For Credentials provider, we already retrieved the user from DB in authorize()
+      if (account?.provider === "credentials") {
+        return true;
+      }
       
       await dbConnect();
       
@@ -41,7 +82,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = (user as any).id;
       }
@@ -50,7 +91,10 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
-    error: "/auth/error",
+    error: "/login", // Redirect to login on error
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-dev",
 };
