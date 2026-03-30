@@ -13,6 +13,12 @@ import { signIn } from "next-auth/react";
 export default function SignupPage() {
   const router = useRouter();
   
+  // Data State
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
   // UI State
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
