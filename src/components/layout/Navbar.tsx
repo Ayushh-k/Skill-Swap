@@ -118,7 +118,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center flex-row justify-between px-4">
         <Link href="/" className="font-heading text-xl font-bold tracking-tight text-white flex items-center justify-center group">
-          <img src="/logo.png" alt="Skill-Swap Logo" className="h-16 sm:h-20 w-auto object-contain scale-[1.8] sm:scale-[2.4] origin-center cursor-pointer group-hover:scale-[2.0] sm:group-hover:scale-[2.6] transition-transform" />
+          <img src="/logo.png" alt="Skill-Swap Logo" className="h-16 sm:h-20 w-auto object-contain scale-[1.5] sm:scale-[2.0] origin-center cursor-pointer group-hover:scale-[1.7] sm:group-hover:scale-[2.2] transition-transform" />
         </Link>
         <div className="flex items-center gap-2">
           {/* Desktop Links */}
