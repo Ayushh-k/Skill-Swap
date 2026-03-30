@@ -5,12 +5,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Bell, Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
   const router = useRouter();
-  const [user, setUser] = useState<{ id: string; email: string; name?: string; avatar?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status } = useSession();
+  const user = session?.user as any;
+  const isLoading = status === "loading";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Notification State
@@ -24,20 +25,6 @@ export default function Navbar() {
       const savedCount = window.localStorage.getItem("skillswap_dismissed_notifs");
       if (savedCount) setDismissedCount(parseInt(savedCount));
     }
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/users/me")
-      .then(res => {
-        if(res.ok) return res.json();
-        return null;
-      })
-      .then(data => {
-        setUser(data);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
   }, []);
 
   useEffect(() => {
@@ -82,12 +69,7 @@ export default function Navbar() {
   }, [user]);
 
   const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setUser(null);
-      router.push("/login");
-      router.refresh();
-    } catch (err) {}
+    await signOut({ redirect: true, callbackUrl: "/login" });
   };
 
   return (
