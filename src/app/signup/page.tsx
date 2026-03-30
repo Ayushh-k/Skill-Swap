@@ -13,72 +13,20 @@ import { signIn } from "next-auth/react";
 export default function SignupPage() {
   const router = useRouter();
   
-  // Form Step State
-  const [step, setStep] = useState(1); // 1: Details, 2: OTP
-  
-  // Data State
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  
   // UI State
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
-  useEffect(() => {
-    // Page load logic
-  }, []);
 
-  async function handleSendOtp() {
+  async function handleSignup(e: React.FormEvent) {
+    e.preventDefault();
     if (!name || !email || !password || !confirmPassword) {
-      toast.error("Please fill all fields first.");
+      toast.error("Please fill all fields.");
       return;
     }
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
-      return;
-    }
-
-    setIsSendingOtp(true);
-    
-    // Failsafe timeout for production cold starts
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-    try {
-      const res = await fetch("/api/auth/otp/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.message || "Failed to send OTP");
-      
-      toast.success("Verification code sent to your email!");
-      setStep(2);
-    } catch (err: any) {
-      if (err.name === "AbortError") {
-        toast.error("Request timed out after 60 seconds. This can happen if the server is waking up. Please try again.");
-      } else {
-        toast.error(err.message || "Network error. Please try again.");
-      }
-    } finally {
-      setIsSendingOtp(false);
-    }
-  }
-
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault();
-    if (otp.length !== 6) {
-      toast.error("Please enter a valid 6-digit code.");
       return;
     }
     
@@ -87,12 +35,12 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, otp }),
+        body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create account");
       
-      toast.success("Account verified and created successfully!");
+      toast.success("Account created successfully!");
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
