@@ -3,14 +3,18 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    const token = req.nextauth.token;
+    
     // Redirect authenticated users away from auth pages
     const isAuthPage =
       req.nextUrl.pathname.startsWith("/login") ||
       req.nextUrl.pathname.startsWith("/signup");
 
-    if (isAuthPage) {
+    if (isAuthPage && token) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
+    
+    return NextResponse.next();
   },
   {
     callbacks: {
@@ -20,7 +24,7 @@ export default withAuth(
           req.nextUrl.pathname.startsWith("/signup");
           
         if (isAuthPage) {
-          return true; // Let them through to get redirected by middleware function above
+          return true; // Always allow access to login/signup, the middleware function will redirect if they DO have a token
         }
         
         // Only allow access to protected routes if we have a token
