@@ -239,10 +239,14 @@ export default function SwapChat() {
     reader.readAsDataURL(file);
   };
 
-  const startCall = (type: "video" | "audio") => {
+  const joinCall = (type: "video" | "audio") => {
     setCallType(type);
     setIsVideoCallOpen(true);
-    saveAndEmitMessage({ swapId: id, senderId: userIdRef.current, text: `Started a ${type} call. Click the button above to join!`, type: "system" });
+  };
+
+  const startCall = (type: "video" | "audio") => {
+    joinCall(type);
+    saveAndEmitMessage({ swapId: id, senderId: userIdRef.current, text: `Started a ${type} call. Click the button below to join!`, type: "system" });
   };
 
   return (
@@ -297,7 +301,15 @@ export default function SwapChat() {
                 return (
                   <div key={msg._id || i} className={`flex ${msg.type === "system" ? "justify-center w-full" : msg.senderId === userId ? "justify-end" : "justify-start"} mb-1`}>
                     {msg.type === "system" ? (
-                      <div className="bg-white/5 text-foreground/70 text-xs px-4 py-1.5 rounded-full border border-white/5 my-1">{msg.text}</div>
+                      <div className="flex flex-col items-center gap-2 my-1 w-full">
+                        <div className="bg-white/5 text-foreground/70 text-[10px] sm:text-xs px-4 py-1.5 rounded-full border border-white/5 max-w-[90%] text-center italic">{msg.text}</div>
+                        {msg.text.includes("Started a") && (
+                          <Button size="sm" variant="outline" className="h-7 text-[10px] gap-2 border-accent-teal/30 text-accent-teal hover:bg-accent-teal/10 animate-pulse" onClick={() => joinCall(msg.text.includes("video") ? "video" : "audio")}>
+                             {msg.text.includes("video") ? <Video className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
+                             Join Call
+                          </Button>
+                        )}
+                      </div>
                     ) : (
                       <div className="relative group/msg flex flex-col max-w-[85%] sm:max-w-[70%]">
 
@@ -455,8 +467,8 @@ export default function SwapChat() {
         {/* Video/Audio Room */}
         <Modal isOpen={isVideoCallOpen} onClose={() => setIsVideoCallOpen(false)} title={`Secure ${callType === "video" ? "Video" : "Voice"} Room`} className="max-w-5xl h-[85vh] p-0 overflow-hidden flex flex-col bg-black">
           <iframe
-            src={`https://meet.jit.si/skillswap-room-${id}#config.startVideoMuted=${callType === "audio"}&config.startAudioOnly=${callType === "audio"}`}
-            allow="camera; microphone; fullscreen; display-capture; autoplay"
+            src={`https://meet.jit.si/skillswap-room-${id}#config.startVideoMuted=${callType === "audio"}&config.startAudioOnly=${callType === "audio"}&interfaceConfigOverwrite.TOOLBAR_BUTTONS=["microphone","camera","closedcaptions","desktop","fullscreen","fittowindow","hangup","profile","chat","recording","livestreaming","etherpad","sharedvideo","settings","raisehand","videoquality","filmstrip","invite","feedback","stats","shortcuts","tileview","videobackgroundblur","download","help","mute-everyone","security"]`}
+            allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write; self; https://meet.jit.si"
             className="w-full flex-1 border-0 rounded-b-xl min-h-[500px]"
           />
         </Modal>
