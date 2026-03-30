@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Settings, Mail, BookOpen, Star, Edit2, CheckCircle, Globe, ShieldCheck } from "lucide-react";
+import { Loader2, Edit2, CheckCircle, Globe, ShieldCheck, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,10 @@ export default function ProfilePage() {
   const [skillsWantedInput, setSkillsWantedInput] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Deletion State
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -87,6 +91,20 @@ export default function ProfilePage() {
     }
   };
 
+  async function handleDeleteAccount() {
+    setIsDeletingAccount(true);
+    try {
+      const res = await fetch("/api/users/profile", { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete account");
+      
+      toast.success("Account deleted successfully.");
+      window.location.href = "/login"; 
+    } catch (error: any) {
+      toast.error(error.message);
+      setIsDeletingAccount(false);
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-12 relative flex-1 flex flex-col items-center">
         <div className="absolute top-[10%] left-[20%] w-[30vw] h-[30vw] min-w-[300px] rounded-full bg-accent-indigo/10 blur-[150px] -z-10 pointer-events-none" />
@@ -94,12 +112,14 @@ export default function ProfilePage() {
         <h1 className="font-heading text-3xl md:text-4xl font-bold text-white tracking-tight mb-8 w-full max-w-2xl text-center sm:text-left">Your Profile</h1>
 
         {isLoading ? (
-          <div className="py-24"><Loader2 className="h-8 w-8 animate-spin text-accent-indigo" /></div>
+          <div className="py-24 flex justify-center w-full">
+            <Loader2 className="h-8 w-8 animate-spin text-accent-indigo" />
+          </div>
         ) : profile ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-2xl"
+            className="w-full max-w-2xl space-y-6"
           >
             <Card className="p-8 bg-surface/40 border-white/10 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4">
@@ -111,7 +131,7 @@ export default function ProfilePage() {
               <div className="flex flex-col items-center sm:items-start sm:flex-row gap-8 mb-10">
                 <div className="relative group/avatar">
                   <div className="h-28 w-28 rounded-2xl bg-gradient-to-br from-accent-indigo to-accent-teal flex items-center justify-center text-white font-bold text-4xl border border-white/10 shadow-inner overflow-hidden">
-                    {profile.avatar ? <img src={profile.avatar} className="w-full h-full object-cover" /> : (profile.name?.[0] || "?")}
+                    {profile.avatar ? <img src={profile.avatar} className="w-full h-full object-cover" alt="Profile" /> : (profile.name?.[0] || "?")}
                   </div>
                   <div className="absolute -bottom-2 -right-2 bg-accent-teal rounded-lg p-1.5 shadow-lg border border-white/10">
                     <CheckCircle className="w-4 h-4 text-background" />
@@ -170,6 +190,20 @@ export default function ProfilePage() {
                 </div>
               </div>
             </Card>
+
+            <div className="pt-8 mt-8 border-t border-white/5">
+              <div className="bg-red-500/5 rounded-2xl border border-red-500/20 p-6">
+                <h3 className="text-lg font-bold text-red-500 mb-2">Danger Zone</h3>
+                <p className="text-sm text-foreground/50 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
+                <Button 
+                  variant="outline" 
+                  className="border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/5"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Delete My Profile
+                </Button>
+              </div>
+            </div>
           </motion.div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-foreground/40">
@@ -241,6 +275,32 @@ export default function ProfilePage() {
               <Button type="submit" isLoading={isSaving} className="bg-accent-indigo hover:bg-accent-indigo/90">Save Changes</Button>
             </div>
           </form>
+        </Modal>
+
+        <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Delete Your Profile?">
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-foreground/70 leading-relaxed">
+              Are you absolutely sure you want to delete your profile? This action will:
+            </p>
+            <ul className="list-disc list-inside text-sm text-foreground/60 space-y-2">
+              <li>Permanently delete your profile information.</li>
+              <li>Remove all your expertise and interest listings.</li>
+              <li>Delete all your active and previous skill swap requests.</li>
+            </ul>
+            <p className="text-sm font-bold text-red-500">This action cannot be undone.</p>
+            
+            <div className="flex gap-3 justify-end pt-6 border-t border-white/5">
+              <Button variant="ghost" type="button" onClick={() => setShowDeleteModal(false)}>Keep My Profile</Button>
+              <Button 
+                type="button" 
+                isLoading={isDeletingAccount} 
+                className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg shadow-red-500/20 px-8"
+                onClick={handleDeleteAccount}
+              >
+                Permanently Delete
+              </Button>
+            </div>
+          </div>
         </Modal>
     </div>
   );
