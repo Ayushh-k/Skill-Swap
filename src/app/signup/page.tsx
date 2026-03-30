@@ -40,13 +40,16 @@ export default function SignupPage() {
     }
 
     setIsSendingOtp(true);
+    console.log("DEBUG: Attempting to send OTP to", email);
     try {
       const res = await fetch("/api/auth/otp/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      console.log("DEBUG: OTP Response Status:", res.status);
       const data = await res.json();
+      console.log("DEBUG: OTP Response Data:", data);
       if (!res.ok) throw new Error(data.message || "Failed to send OTP");
       
       toast.success("Verification code sent to your email!");
@@ -160,7 +163,13 @@ export default function SignupPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendOtp();
+                  }}
+                  className="space-y-4"
+                >
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-white">Full Name</label>
                     <Input
@@ -221,13 +230,13 @@ export default function SignupPage() {
                   </div>
 
                   <Button 
-                    onClick={handleSendOtp} 
+                    type="submit" 
                     className="w-full h-12 bg-gradient-to-r from-accent-teal to-accent-indigo border-0 hover:opacity-90 shadow-[0_0_20px_rgba(20,184,166,0.2)] transition-all mt-4" 
                     isLoading={isSendingOtp}
                   >
                     Verify Email <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
-                </div>
+                </form>
 
                 <p className="text-center text-sm text-foreground/70">
                   Already have an account? <Link href="/login" className="text-white hover:text-accent-indigo font-medium font-heading">Log in</Link>
