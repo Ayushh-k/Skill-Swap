@@ -44,8 +44,10 @@ export default function SignupPage() {
     }
 
     setIsSendingOtp(true);
+    
+    // Failsafe timeout increased for production cold starts
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
       console.log("DEBUG: Sending OTP request...");
@@ -66,7 +68,7 @@ export default function SignupPage() {
     } catch (err: any) {
       console.error("DEBUG OTP Error:", err);
       if (err.name === "AbortError") {
-        toast.error("Request timed out after 15 seconds. Please try again.");
+        toast.error("Request timed out after 60 seconds. This may happen if the server is waking up. Please try one more time.");
       } else {
         toast.error(err.message || "Network error. Please try again.");
       }
