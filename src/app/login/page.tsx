@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Sparkles, Eye, EyeOff } from "lucide-react";
 
+import { signIn } from "next-auth/react";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -38,7 +40,8 @@ export default function LoginPage() {
   }
 
   function handleOAuth(provider: string) {
-    toast.error(`${provider} login requires OAuth configuration in production environment.`);
+    const providerId = provider.toLowerCase() === "microsoft" ? "azure-ad" : "google";
+    signIn(providerId, { callbackUrl: "/dashboard" });
   }
 
   return (

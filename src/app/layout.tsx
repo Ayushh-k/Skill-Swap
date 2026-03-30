@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { SocketProvider } from "@/components/providers/SocketProvider";
+import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 
 export default function RootLayout({
   children,
@@ -33,14 +34,16 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased dark`}
     >
       <body className="font-sans bg-background text-foreground min-h-full flex flex-col selection:bg-accent-indigo/30 selection:text-white">
-        <SocketProvider>
-          <Navbar />
-          <main className="flex-1 overflow-x-hidden">
-            {children}
-          </main>
-          <Footer />
-          <Toaster theme="dark" position="top-center" />
-        </SocketProvider>
+        <NextAuthProvider>
+          <SocketProvider>
+            <Navbar />
+            <main className="flex-1 overflow-x-hidden">
+              {children}
+            </main>
+            <Footer />
+            <Toaster theme="dark" position="top-center" />
+          </SocketProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );
