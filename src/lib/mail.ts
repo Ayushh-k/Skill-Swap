@@ -13,7 +13,7 @@ export async function sendOTP(email: string, otp: string) {
       "Authorization": `Bearer ${RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "Skill-Swap <onboarding@resend.dev>",
+      from: "onboarding@resend.dev",
       to: email,
       subject: "Verify your Skill-Swap Account",
       html: `
