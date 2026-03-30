@@ -31,7 +31,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className={cn(
-                "relative w-full max-w-lg rounded-2xl border border-white/10 bg-surface/90 backdrop-blur-md p-6 shadow-2xl pointer-events-auto",
+                "relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-surface/90 backdrop-blur-md p-6 shadow-2xl pointer-events-auto custom-scrollbar",
                 className
               )}
             >
