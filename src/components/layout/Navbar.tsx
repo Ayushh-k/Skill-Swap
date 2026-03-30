@@ -33,6 +33,8 @@ export default function Navbar() {
       })
       .then(data => {
         setUser(data);
+      })
+      .finally(() => {
         setIsLoading(false);
       });
   }, []);
@@ -94,7 +96,7 @@ export default function Navbar() {
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-accent-indigo to-accent-teal flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-shadow">
             <span className="text-white text-base">S</span>
           </div>
-          <span className="hidden xs:block">Skill-Swap</span>
+          <span className="block">Skill-Swap</span>
         </Link>
         <div className="flex items-center gap-2">
           {/* Desktop Links */}
