@@ -270,9 +270,18 @@ export default function ProfilePage() {
                 className="bg-white/5 border-white/10"
               />
             </div>
-            <div className="flex gap-3 justify-end pt-4">
-              <Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>Cancel</Button>
-              <Button type="submit" isLoading={isSaving} className="bg-accent-indigo hover:bg-accent-indigo/90">Save Changes</Button>
+            <div className="flex items-center justify-between pt-6 border-t border-white/5">
+              <button 
+                type="button" 
+                onClick={() => { setIsEditing(false); setShowDeleteModal(true); }}
+                className="text-xs text-red-500/60 hover:text-red-500 transition-colors font-medium"
+              >
+                Delete Account
+              </button>
+              <div className="flex gap-3">
+                <Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button type="submit" isLoading={isSaving} className="bg-accent-indigo hover:bg-accent-indigo/90">Save Changes</Button>
+              </div>
             </div>
           </form>
         </Modal>
