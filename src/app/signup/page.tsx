@@ -57,7 +57,6 @@ export default function SignupPage() {
         toast.error("Account created, but automatic login failed. Please log in manually.");
         router.push("/login");
       } else {
-        await update(); // Force session refresh
         toast.success("Account created and logged in!");
         router.push("/dashboard");
         router.refresh();

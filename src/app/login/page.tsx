@@ -32,7 +32,6 @@ export default function LoginPage() {
       if (res?.error) {
         toast.error(res.error);
       } else {
-        await update(); // Force session refresh
         toast.success("Welcome back!");
         router.push("/dashboard");
         router.refresh();

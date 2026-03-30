@@ -18,6 +18,7 @@ export default function Navbar() {
   const [unread, setUnread] = useState({ count: 0, messages: [] as any[] });
   const [showNotifs, setShowNotifs] = useState(false);
   const [dismissedCount, setDismissedCount] = useState(0);
+  const [dbAvatar, setDbAvatar] = useState<string | null>(null);
   const isInitialFetch = useRef(true);
 
   useEffect(() => {
@@ -26,6 +27,18 @@ export default function Navbar() {
       if (savedCount) setDismissedCount(parseInt(savedCount));
     }
   }, []);
+
+  useEffect(() => {
+    if (user && !user.image) {
+      // Fetch avatar from DB since we stripped the massive base64 string from the JWT session
+      fetch("/api/users/me")
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.avatar) setDbAvatar(data.avatar);
+        })
+        .catch(() => {});
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -71,6 +84,8 @@ export default function Navbar() {
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: "/login" });
   };
+
+  const displayAvatar = user?.image || dbAvatar;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
@@ -140,8 +155,8 @@ export default function Navbar() {
 
                   <Link href="/profile" className="hidden sm:block">
                      <Button variant="ghost" size="sm" className="flex gap-2 text-white hover:bg-white/10 relative overflow-hidden group">
-                       {user.avatar ? (
-                          <img src={user.avatar} alt="Avatar" className="w-5 h-5 object-cover rounded-full" />
+                       {displayAvatar ? (
+                          <img src={displayAvatar} alt="Avatar" className="w-5 h-5 object-cover rounded-full" />
                        ) : (
                           <User className="w-4 h-4" />
                        )}
