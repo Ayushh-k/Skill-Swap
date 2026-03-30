@@ -45,7 +45,7 @@ export default function SignupPage() {
 
     setIsSendingOtp(true);
     
-    // Failsafe timeout increased for production cold starts
+    // Failsafe timeout for production cold starts
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
@@ -66,7 +66,7 @@ export default function SignupPage() {
       setStep(2);
     } catch (err: any) {
       if (err.name === "AbortError") {
-        toast.error("Request timed out after 60 seconds. This may happen if the server is waking up. Please try one more time.");
+        toast.error("Request timed out after 60 seconds. This can happen if the server is waking up. Please try again.");
       } else {
         toast.error(err.message || "Network error. Please try again.");
       }
