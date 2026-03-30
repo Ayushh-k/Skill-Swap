@@ -2,8 +2,15 @@
 
 import { Mail, Globe, Heart } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/swap/")) {
+    return null; // Hide footer purely on chat pages to save vertical space
+  }
+
   return (
     <footer className="w-full border-t border-white/10 bg-background/80 backdrop-blur-md pt-16 pb-8">
       <div className="container mx-auto px-4">
