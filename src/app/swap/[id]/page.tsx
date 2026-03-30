@@ -354,12 +354,39 @@ export default function SwapChat() {
                             <div className="flex flex-col gap-2">
                               <span className="font-semibold text-xs opacity-70 flex items-center gap-1"><Paperclip className="w-3 h-3" /> Attachment</span>
                               {msg.fileUrl.startsWith("data:image") ? (
-                                <img src={msg.fileUrl} alt="attachment" className="rounded-lg w-full max-w-[300px] object-contain border border-white/10 shadow-lg mt-1" />
+                                <div className="relative group/img max-w-[300px]">
+                                  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg border border-white/10 shadow-lg mt-1 cursor-zoom-in">
+                                    <img src={msg.fileUrl} alt="attachment" className="w-full object-contain transition-transform duration-300 group-hover/img:scale-105" />
+                                  </a>
+                                  <a 
+                                    href={msg.fileUrl} 
+                                    download={`image_${new Date().getTime()}.png`}
+                                    className="absolute bottom-2 right-2 p-2 bg-black/60 backdrop-blur-md rounded-full text-white opacity-0 group-hover/img:opacity-100 transition-opacity hover:bg-black/80 shadow-xl"
+                                    title="Download Image"
+                                  >
+                                    <DownloadCloud className="w-4 h-4" />
+                                  </a>
+                                </div>
                               ) : (
-                                <a href={msg.fileUrl} download={msg.text.replace("Sent an attachment: ", "")} className="flex items-center gap-2 p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-colors">
-                                  <DownloadCloud className="w-5 h-5 opacity-80 shrink-0" />
-                                  <span className="underline truncate max-w-[200px]">{msg.text.replace("Sent an attachment: ", "")}</span>
-                                </a>
+                                <div className="flex flex-col gap-2">
+                                  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-colors group/file">
+                                    <Paperclip className="w-5 h-5 opacity-80 shrink-0" />
+                                    <span className="underline truncate max-w-[150px] sm:max-w-[200px] text-xs sm:text-sm font-medium">{msg.text.replace("Sent an attachment: ", "")}</span>
+                                    <DownloadCloud 
+                                      className="w-4 h-4 ml-auto opacity-40 group-hover/file:opacity-100 transition-opacity cursor-pointer" 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const link = document.createElement('a');
+                                        link.href = msg.fileUrl!;
+                                        link.download = msg.text.replace("Sent an attachment: ", "");
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                      }}
+                                    />
+                                  </a>
+                                </div>
                               )}
                             </div>
                           ) : (
