@@ -47,7 +47,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          image: user.avatar,
+          image: user.avatar?.startsWith('http') ? user.avatar : undefined,
         };
       }
     }),
