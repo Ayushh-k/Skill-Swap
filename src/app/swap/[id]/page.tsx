@@ -11,6 +11,7 @@ import { Send, ArrowLeft, Paperclip, Video, Phone, DownloadCloud, Check, CheckCh
 import Link from "next/link";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/modal";
+import { cn } from "@/lib/utils";
 
 type Message = {
   _id?: string;
@@ -37,6 +38,11 @@ export default function SwapChat() {
   const [input, setInput] = useState("");
   const [userId, setUserId] = useState<string>("");
   const [peer, setPeer] = useState<{ name: string; _id: string; avatar?: string; email?: string; bio?: string; skillsOffered?: string[]; skillsWanted?: string[] } | null>(null);
+  const [peerStatus, setPeerStatus] = useState<"online" | "offline">("offline");
+  const [isPeerTyping, setIsPeerTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isTypingRef = useRef(false);
+
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -92,16 +98,25 @@ export default function SwapChat() {
       let currentUserId = "";
       if (meRes.ok) {
         const meData = await meRes.json();
-        setUserId(meData.id);
-        userIdRef.current = meData.id;
-        currentUserId = meData.id;
+        if (meData?.id) {
+          setUserId(meData.id);
+          userIdRef.current = meData.id;
+          currentUserId = meData.id;
+        }
       }
 
       const swapRes = await fetch(`/api/swaps/${id}`);
       if (swapRes.ok) {
         const swapData = await swapRes.json();
-        const other = swapData.requester._id === currentUserId ? swapData.receiver : swapData.requester;
-        setPeer(other);
+        const requesterId = swapData.requester?._id || swapData.requester;
+        const other = requesterId === currentUserId ? swapData.receiver : swapData.requester;
+        if (other) {
+          setPeer(other);
+          // Ask for peer's current status immediately after finding who they are
+          if (socketRef.current) {
+            socketRef.current.emit("get_user_status", other._id);
+          }
+        }
       }
 
       const msgRes = await fetch(`/api/messages?swapId=${id}`);
@@ -122,10 +137,88 @@ export default function SwapChat() {
 
     socketInstance.on("connect", () => {
       socketInstance.emit("join_swap", id);
-      // Mark existing messages as read
-      if (userIdRef.current) {
-        socketInstance.emit("mark_read", { swapId: id, userId: userIdRef.current });
+    });
+
+    socketInstance.on("receive_message", (message: Message) => {
+      setMessages((prev) => {
+        // Replace optimistic message (no real _id) with server message and keep _optimisticReplyTo
+        const optimisticIdx = prev.findIndex(m => !m._id && m.text === message.text && m.senderId === message.senderId);
+        if (optimisticIdx !== -1) {
+          const optimistic = prev[optimisticIdx];
+          const updated = [...prev];
+          updated[optimisticIdx] = {
+            ...message,
+            _optimisticReplyTo: optimistic._optimisticReplyTo ?? null,
+          };
+          return updated;
+        }
+        if (prev.some(m => m._id === message._id)) return prev;
+        return [...prev, message];
+      });
+
+      const currentId = userIdRef.current;
+      if (message.senderId !== currentId) {
+        socketInstance.emit("mark_read", { swapId: id, userId: currentId });
+        toast(`New Message: ${message.text.substring(0, 30)}...`);
+        try {
+          const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioContext) {
+            const ctx = new AudioContext();
+            const playOsci = (freq: number, startTime: number) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "sine";
+              osc.frequency.value = freq;
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              gain.gain.setValueAtTime(0, startTime);
+              gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+              gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+              osc.start(startTime);
+              osc.stop(startTime + 0.4);
+            };
+            playOsci(523.25, ctx.currentTime);
+            playOsci(659.25, ctx.currentTime + 0.15);
+          }
+        } catch(e) {}
       }
+      setTimeout(scrollToBottom, 50);
+    });
+
+    socketInstance.on("messages_read", ({ readerId }: { readerId: string }) => {
+      const currentId = userIdRef.current;
+      if (readerId !== currentId) {
+        setMessages(prev => prev.map(m => m.senderId === currentId ? { ...m, isRead: true } : m));
+      }
+    });
+
+    // Live reaction updates from server (confirms/syncs)
+    socketInstance.on("message_reacted", ({ messageId, reactions }: { messageId: string; reactions: Record<string, string> }) => {
+      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, reactions } : m));
+    });
+
+    // Live delete confirmation from server
+    socketInstance.on("message_deleted", (messageId: string) => {
+      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isDeleted: true, text: "This message was deleted." } : m));
+    });
+
+    socketInstance.on("user_status", ({ userId: statusUserId, status }: { userId: string, status: "online" | "offline" }) => {
+      // Use a function ref or just wait for peer state to be set
+      setPeer((currentPeer) => {
+        if (currentPeer && currentPeer._id === statusUserId) {
+          setPeerStatus(status);
+        }
+        return currentPeer;
+      });
+    });
+
+    socketInstance.on("typing_status", ({ userId: typingUserId, isTyping }: { userId: string, isTyping: boolean }) => {
+      setPeer((currentPeer) => {
+        if (currentPeer && currentPeer._id === typingUserId) {
+          setIsPeerTyping(isTyping);
+        }
+        return currentPeer;
+      });
     });
 
     socketInstance.on("receive_message", (message: Message) => {
@@ -194,8 +287,24 @@ export default function SwapChat() {
     return () => {
       socketInstance.disconnect();
       socketRef.current = null;
+      delete (window as any).socket;
     };
   }, [id]);
+
+  // Handle joining user room when ID is available
+  useEffect(() => {
+    if (userId && socketRef.current) {
+      socketRef.current.emit("join_user", userId);
+      socketRef.current.emit("mark_read", { swapId: id, userId });
+    }
+  }, [userId, id]);
+
+  // Handle fetching peer status when peer is loaded
+  useEffect(() => {
+    if (peer?._id && socketRef.current) {
+      socketRef.current.emit("get_user_status", peer._id);
+    }
+  }, [peer?._id, id]);
 
   const saveAndEmitMessage = async (msgData: any) => {
     const optimisticId = `optimistic_${Date.now()}`;
@@ -230,6 +339,12 @@ export default function SwapChat() {
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !socketRef.current || !userIdRef.current) return;
+    
+    // Stop typing immediately on send
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    isTypingRef.current = false;
+    socketRef.current.emit("typing", { swapId: id, userId: userIdRef.current, isTyping: false });
+
     const msgData: any = { swapId: id, senderId: userIdRef.current, text: input, type: "text" };
     if (replyingTo && replyingTo._id) {
       msgData.replyTo = replyingTo._id;
@@ -290,9 +405,23 @@ export default function SwapChat() {
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="font-heading text-lg sm:text-xl font-bold text-white tracking-tight leading-tight truncate">{peer.name}</span>
-                  <span className="text-xs text-accent-teal font-medium flex items-center gap-1.5 truncate">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent-teal animate-pulse" /> Online
-                  </span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors",
+                      peerStatus === "online" ? "text-accent-teal" : "text-foreground/30"
+                    )}>
+                      <span className={cn(
+                        "w-1.5 h-1.5 rounded-full transition-all duration-500",
+                        peerStatus === "online" ? "bg-accent-teal shadow-[0_0_8px_rgba(20,184,166,0.6)] animate-pulse" : "bg-foreground/20"
+                      )} />
+                      {peerStatus}
+                    </span>
+                    {isPeerTyping && (
+                      <span className="text-[10px] text-accent-indigo font-bold italic animate-bounce ml-1 flex items-center">
+                        Typing...
+                      </span>
+                    )}
+                  </div>
                 </div>
               </button>
             ) : (
@@ -474,7 +603,21 @@ export default function SwapChat() {
                 </Button>
                 <Input
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    
+                    // Typing status logic
+                    if (!isTypingRef.current && e.target.value.trim() !== "") {
+                      isTypingRef.current = true;
+                      socketRef.current?.emit("typing", { swapId: id, userId: userIdRef.current, isTyping: true });
+                    }
+
+                    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                    typingTimeoutRef.current = setTimeout(() => {
+                      isTypingRef.current = false;
+                      socketRef.current?.emit("typing", { swapId: id, userId: userIdRef.current, isTyping: false });
+                    }, 2000);
+                  }}
                   placeholder={replyingTo ? "Write your reply..." : "Type your message..."}
                   className="flex-1 h-12 bg-white/5 border-white/10 focus-visible:ring-accent-teal/50 text-foreground"
                 />

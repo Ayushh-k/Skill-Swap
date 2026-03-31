@@ -4,39 +4,30 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
-    
-    // Redirect authenticated users away from auth pages
-    const isAuthPage =
-      req.nextUrl.pathname.startsWith("/login") ||
-      req.nextUrl.pathname.startsWith("/signup");
+    const isAuth = !!token;
+    const isAdminPage = req.nextUrl.pathname.startsWith("/admin");
 
-    if (isAuthPage && token) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+    if (isAdminPage) {
+      if (!isAuth) {
+        return NextResponse.redirect(new URL("/login", req.url));
+      }
+      if (token.role !== "admin") {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
     }
-    
+
     return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ req, token }) => {
-        const isAuthPage =
-          req.nextUrl.pathname.startsWith("/login") ||
-          req.nextUrl.pathname.startsWith("/signup");
-          
-        if (isAuthPage) {
-          return true; // Always allow access to login/signup, the middleware function will redirect if they DO have a token
-        }
-        
-        // Only allow access to protected routes if we have a token
-        return !!token;
+      async authorized() {
+        // This is a dummy return to allow the middleware function above to run
+        return true;
       },
-    },
-    pages: {
-      signIn: "/login",
     },
   }
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/explore/:path*", "/swap/:path*", "/login", "/signup"],
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/profile/:path*", "/swap/:path*"],
 };

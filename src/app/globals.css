@@ -6,6 +6,11 @@
   --color-surface: var(--surface);
   --color-accent-indigo: var(--accent-indigo);
   --color-accent-teal: var(--accent-teal);
+  --color-admin-bg: #09090b;
+  --color-admin-surface: #18181b;
+  --color-admin-emerald: #10b981;
+  --color-admin-rose: #f43f5e;
+  --color-admin-blue: #3b82f6;
   --font-sans: var(--font-inter);
   --font-heading: var(--font-heading);
   --breakpoint-xs: 475px;
@@ -17,6 +22,14 @@
   --surface: rgba(23, 23, 23, 0.5);
   --accent-indigo: #6366f1;
   --accent-teal: #14b8a6;
+}
+
+.admin-theme {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --surface: #18181b;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 body {

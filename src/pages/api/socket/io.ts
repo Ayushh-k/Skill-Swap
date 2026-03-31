@@ -11,6 +11,9 @@ export const config = {
   },
 };
 
+// Global Map to track userId -> Set of socketId's
+const onlineUsers = new Map<string, Set<string>>();
+
 const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
   if (!res.socket.server.io) {
     const path = "/api/socket/io";
@@ -27,12 +30,13 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
     res.socket.server.io = io;
 
     io.on("connection", (socket) => {
+      let currentUserId: string | null = null;
+
       socket.on("join_swap", (swapId: string) => {
         socket.join(swapId);
       });
 
       socket.on("send_message", (data: any) => {
-        // Broadcast the already-saved message payload to the room
         io.to(data.swapId).emit("receive_message", data);
       });
 
@@ -80,19 +84,45 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
 
       socket.on("join_user", (userId: string) => {
         socket.join(`user_${userId}`);
+        currentUserId = userId;
+
+        if (!onlineUsers.has(userId)) {
+          onlineUsers.set(userId, new Set());
+        }
+        onlineUsers.get(userId)?.add(socket.id);
+        
+        // Broadcast online status to everyone
+        io.emit("user_status", { userId, status: "online" });
+      });
+
+      socket.on("get_user_status", (userId: string) => {
+        const isOnline = onlineUsers.has(userId) && (onlineUsers.get(userId)?.size || 0) > 0;
+        socket.emit("user_status", { userId, status: isOnline ? "online" : "offline" });
+      });
+
+      socket.on("typing", ({ swapId, userId, isTyping }: any) => {
+        socket.to(swapId).emit("typing_status", { userId, isTyping });
       });
 
       socket.on("new_swap_request", (data: any) => {
-        // Emit to the receiver's private room
         io.to(`user_${data.receiverId}`).emit("notif_new_swap", data);
       });
 
       socket.on("swap_status_updated", (data: any) => {
-        // Notify the requester that their request was accepted/rejected
         io.to(`user_${data.requesterId}`).emit("notif_swap_updated", data);
       });
 
-      socket.on("disconnect", () => {});
+      socket.on("disconnect", () => {
+        if (currentUserId && onlineUsers.has(currentUserId)) {
+          const sockets = onlineUsers.get(currentUserId);
+          sockets?.delete(socket.id);
+          if (sockets?.size === 0) {
+            onlineUsers.delete(currentUserId);
+            // Broadcast offline status
+            io.emit("user_status", { userId: currentUserId, status: "offline" });
+          }
+        }
+      });
     });
   }
   res.end();

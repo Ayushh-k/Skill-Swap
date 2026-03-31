@@ -4,6 +4,8 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
+  role: "user" | "admin";
+  status: "active" | "banned" | "pending";
   avatar?: string;
   skillsOffered: string[];
   skillsWanted: string[];
@@ -57,6 +59,16 @@ const UserSchema: Schema<IUser> = new Schema(
       type: String,
       maxlength: [500, "Bio cannot be more than 500 characters"],
       default: "",
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    status: {
+      type: String,
+      enum: ["active", "banned", "pending"],
+      default: "active",
     },
   },
   {

@@ -13,6 +13,7 @@ export async function GET() {
 
     await dbConnect();
     const user = await User.findById(userPayload.id).select("-password");
+    if (!user) return NextResponse.json({ message: "User not found" }, { status: 404 });
     
     return NextResponse.json(user);
   } catch (error: any) {

@@ -35,12 +35,18 @@ export default function ProfilePage() {
       const res = await fetch("/api/users/profile");
       if (res.ok) {
         const data = await res.json();
-        setProfile(data);
-        setName(data.name);
-        setBio(data.bio || "");
-        setSkillsOfferedInput(data.skillsOffered?.join(", ") || "");
-        setSkillsWantedInput(data.skillsWanted?.join(", ") || "");
-        setAvatarUrl(data.avatar || null);
+        if (data) {
+          setProfile(data);
+          setName(data.name || "");
+          setBio(data.bio || "");
+          setSkillsOfferedInput(data.skillsOffered?.join(", ") || "");
+          setSkillsWantedInput(data.skillsWanted?.join(", ") || "");
+          setAvatarUrl(data.avatar || null);
+        } else {
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
       }
     } catch (err) {
       console.error(err);

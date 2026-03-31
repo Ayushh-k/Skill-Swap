@@ -18,8 +18,7 @@ export const metadata: Metadata = {
   description: "A bespoke premium platform for swapping skills seamlessly.",
 };
 
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import { SocketProvider } from "@/components/providers/SocketProvider";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 
@@ -36,11 +35,9 @@ export default function RootLayout({
       <body className="font-sans bg-background text-foreground min-h-full flex flex-col selection:bg-accent-indigo/30 selection:text-white">
         <NextAuthProvider>
           <SocketProvider>
-            <Navbar />
-            <main className="flex-1 overflow-x-hidden">
+            <ConditionalLayout>
               {children}
-            </main>
-            <Footer />
+            </ConditionalLayout>
             <Toaster theme="dark" position="top-center" />
           </SocketProvider>
         </NextAuthProvider>

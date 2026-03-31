@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import { User } from "@/models/User";
+import { AdminNotification } from "@/models/AdminNotification";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -28,6 +29,15 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
+    });
+
+    // Notify Admin
+    await AdminNotification.create({
+      type: "new_user",
+      title: "New Platform Member",
+      message: `${name} has just joined Skill-Swap.`,
+      link: "/admin/users",
+      metadata: { userId: user._id }
     });
 
     const response = NextResponse.json(
