@@ -175,7 +175,14 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-12 bg-gradient-to-r from-accent-indigo to-accent-teal border-0 hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all" isLoading={isLoading}>
+            <Button 
+              type="submit" 
+              variant="premium"
+              topDrawer="Welcome Back"
+              bottomDrawer="Secure Login"
+              className="w-full h-12" 
+              isLoading={isLoading}
+            >
               Log back in
             </Button>
           </form>

@@ -81,7 +81,7 @@ body {
 
 /* Premium Dynamic Button Global Styles */
 :root {
-  --btn-premium-color: #d8ff7c;
+  --btn-premium-color: #14b8a6;
   --btn-premium-corner: #0002;
   --btn-corner-dist: 24px;
   --btn-corner-multiplier: 1.5;
@@ -104,7 +104,7 @@ body {
   border-radius: 16px;
   border: none;
   padding: 0.6em 1.5em;
-  background: linear-gradient(#fff2, #0001), var(--btn-premium-color);
+  background: var(--btn-premium-color);
   box-shadow:
     1px 1px 2px -1px #fff inset,
     0 2px 1px #00000010,

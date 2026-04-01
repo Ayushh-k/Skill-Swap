@@ -198,7 +198,10 @@ export default function SignupPage() {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-accent-teal to-accent-indigo border-0 hover:opacity-90 shadow-[0_0_20px_rgba(20,184,166,0.2)] transition-all mt-4" 
+                variant="premium"
+                topDrawer="Join Now"
+                bottomDrawer="100% Free"
+                className="w-full h-12 mt-4" 
                 isLoading={isLoading}
               >
                 Create Account <ArrowRight className="w-4 h-4 ml-2" />

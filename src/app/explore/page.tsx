@@ -217,7 +217,10 @@ export default function Explore() {
                 </div>
 
                 <Button 
-                  className="w-full mt-6 bg-gradient-to-r from-accent-indigo to-accent-teal hover:opacity-90 text-white font-bold h-11 border-0 shadow-lg group-hover:shadow-accent-teal/20 transition-all z-10"
+                  variant="premium"
+                  topDrawer="Let's Swap"
+                  bottomDrawer="Expert Help"
+                  className="w-full mt-6 h-11"
                   onClick={() => { setSelectedUser(user); setIsModalOpen(true); }}
                 >
                   Swap Skills
@@ -275,6 +278,8 @@ export default function Explore() {
           <div className="flex gap-3 pt-6 border-t border-white/5">
             <Button variant="ghost" className="flex-1" onClick={() => setIsProfileModalOpen(false)}>Close</Button>
             <Button 
+               variant="premium"
+               topDrawer="Start Now"
                className="flex-1" 
                onClick={() => {
                  setIsProfileModalOpen(false);
@@ -324,7 +329,14 @@ export default function Explore() {
           </div>
           <div className="flex gap-3 justify-end pt-4">
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="submit" isLoading={isSubmitting}>Send Request</Button>
+            <Button 
+              type="submit" 
+              variant="premium"
+              topDrawer="Sending..."
+              isLoading={isSubmitting}
+            >
+              Send Request
+            </Button>
           </div>
         </form>
       </Modal>

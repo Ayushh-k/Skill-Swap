@@ -261,10 +261,10 @@ export default function Navbar() {
           ) : (
             <div className="flex flex-col gap-3 pt-2">
               <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full">Log in</Button>
+                <Button variant="premium" topDrawer="Welcome" className="w-full">Log in</Button>
               </Link>
               <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="w-full">Sign up</Button>
+                <Button variant="premium" topDrawer="Join Now" className="w-full">Sign up</Button>
               </Link>
             </div>
           )}

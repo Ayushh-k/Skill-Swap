@@ -286,7 +286,14 @@ export default function ProfilePage() {
               </button>
               <div className="flex gap-3">
                 <Button variant="ghost" type="button" onClick={() => setIsEditing(false)}>Cancel</Button>
-                <Button type="submit" isLoading={isSaving} className="bg-accent-indigo hover:bg-accent-indigo/90">Save Changes</Button>
+                <Button 
+                  type="submit" 
+                  variant="premium"
+                  topDrawer="Saving..."
+                  isLoading={isSaving}
+                >
+                  Save Changes
+                </Button>
               </div>
             </div>
           </form>
