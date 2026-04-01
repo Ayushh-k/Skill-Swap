@@ -36,6 +36,14 @@ const ioHandler = async (req: NextApiRequest, res: NextApiResponseServerIo) => {
         socket.join(swapId);
       });
 
+      socket.on("join_admin", () => {
+        socket.join("admin_room");
+      });
+
+      socket.on("admin_refresh", (type: string) => {
+        io.to("admin_room").emit("refresh_data", { type });
+      });
+
       socket.on("send_message", (data: any) => {
         io.to(data.swapId).emit("receive_message", data);
       });

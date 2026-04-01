@@ -1,186 +1,249 @@
 "use client";
 
-import { useState } from "react";
-import { Shield, Bell, Database, Globe, Key, Save, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, Bell, Database, Globe, Key, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import DynamicButton from "@/components/admin/DynamicButton";
 
 const SECTIONS = [
   { id: "general",    icon: Globe,     label: "General" },
   { id: "security",   icon: Shield,    label: "Security" },
-  { id: "notifications", icon: Bell,   label: "Notifications" },
-  { id: "database",   icon: Database,  label: "Database" },
+  { id: "notifications", icon: Bell,   label: "Alerts" },
+  { id: "database",   icon: Database,  label: "Platform" },
 ];
 
 export default function AdminSettingsPage() {
   const [activeSection, setActiveSection] = useState("general");
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [settings, setSettings] = useState({
+    siteName: "",
+    allowSignups: true,
+    maintenanceMode: false,
+    requireEmailVerification: false,
+    sessionTimeout: 7,
+    adminAlerts: true,
+    newUserAlerts: true,
+    contactEmail: "",
+    maxSwapsPerUser: 10,
+    featureChat: true,
+    featureAnalytics: true,
+  });
 
-  // General settings state
-  const [siteName, setSiteName] = useState("Skill-Swap Platform");
-  const [allowSignups, setAllowSignups] = useState(true);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-
-  // Security settings state
-  const [requireEmailVerification, setRequireEmailVerification] = useState(true);
-  const [sessionTimeout, setSessionTimeout] = useState("7");
-
-  // Notification settings state
-  const [adminAlerts, setAdminAlerts] = useState(true);
-  const [newUserAlerts, setNewUserAlerts] = useState(true);
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/admin/settings");
+        const data = await res.json();
+        if (res.ok) setSettings(data);
+      } catch (error) {
+        toast.error("Failed to load settings");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise(r => setTimeout(r, 800)); // simulate save
-    setSaving(false);
-    setSaved(true);
-    toast.success("Settings saved successfully!");
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      if (res.ok) {
+        toast.success("Settings updated successfully");
+      } else {
+        toast.error("Failed to update settings");
+      }
+    } catch (error) {
+      toast.error("Network error saving settings");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="h-64 flex items-center justify-center bg-admin-surface border border-white/10 rounded-2xl">
+        <Loader2 className="w-8 h-8 text-admin-emerald animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
       <div className="flex items-end justify-between">
         <div>
           <h2 className="text-3xl font-bold text-white tracking-tight">Settings</h2>
-          <p className="text-foreground/40 font-medium mt-1">Configure platform-wide behavior and preferences.</p>
+          <p className="text-foreground/40 font-medium mt-1">Configure platform rules and administrative preferences.</p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-admin-emerald text-black rounded-xl font-bold text-sm hover:bg-admin-emerald/90 transition-all disabled:opacity-60 shadow-lg shadow-admin-emerald/20"
-        >
-          {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
-        </button>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-admin-emerald/10 border border-admin-emerald/20">
+          <CheckCircle className="w-4 h-4 text-admin-emerald" />
+          <span className="text-[10px] font-bold text-admin-emerald uppercase tracking-wider">System Live</span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Nav */}
-        <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0">
-          {SECTIONS.map(s => (
+        <div className="space-y-2">
+          {SECTIONS.map((section) => (
             <button
-              key={s.id}
-              onClick={() => setActiveSection(s.id)}
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold whitespace-nowrap transition-all w-full text-left",
-                activeSection === s.id
-                  ? "bg-admin-emerald/10 text-admin-emerald border border-admin-emerald/20"
-                  : "text-foreground/50 hover:text-white hover:bg-white/5 border border-transparent"
+                "w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-semibold text-sm",
+                activeSection === section.id 
+                  ? "bg-admin-emerald/10 text-admin-emerald border border-admin-emerald/20" 
+                  : "text-foreground/40 hover:text-white hover:bg-white/5 border border-transparent"
               )}
             >
-              <s.icon className="w-4 h-4 shrink-0" />
-              {s.label}
+              <section.icon className="w-5 h-5 shrink-0" />
+              {section.label}
             </button>
           ))}
         </div>
 
-        {/* Settings Panel */}
-        <div className="bg-admin-surface border border-white/10 rounded-2xl p-8 space-y-8">
+        {/* Settings Content */}
+        <div className="lg:col-span-3">
+          <div className="p-8 rounded-3xl bg-admin-surface border border-white/10 shadow-2xl space-y-8">
+            
+            {activeSection === "general" && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-3">Platform Name</label>
+                  <input 
+                    type="text" 
+                    value={settings.siteName}
+                    onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-admin-emerald/50 transition-all font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-3">Public Contact Email</label>
+                  <input 
+                    type="email" 
+                    value={settings.contactEmail}
+                    onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-admin-emerald/50 transition-all font-medium"
+                  />
+                </div>
+              </div>
+            )}
 
-          {activeSection === "general" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-white border-b border-white/10 pb-4">General Settings</h3>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground/70">Platform Name</label>
-                <input
-                  value={siteName}
-                  onChange={e => setSiteName(e.target.value)}
-                  className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-admin-emerald/50 transition-colors"
+            {activeSection === "security" && (
+              <div className="space-y-6">
+                <Toggle 
+                  label="Maintenance Mode" 
+                  description="Disable all public-facing features except for Admins."
+                  enabled={settings.maintenanceMode}
+                  onChange={(val) => setSettings({ ...settings, maintenanceMode: val })}
+                />
+                <Toggle 
+                  label="New Member Onboarding" 
+                  description="Allow new users to sign up to the platform."
+                  enabled={settings.allowSignups}
+                  onChange={(val) => setSettings({ ...settings, allowSignups: val })}
+                />
+                <Toggle 
+                  label="Mandatory Verification" 
+                  description="Require email OTP verification for all actions."
+                  enabled={settings.requireEmailVerification}
+                  onChange={(val) => setSettings({ ...settings, requireEmailVerification: val })}
                 />
               </div>
-              <ToggleRow label="Allow New Signups" description="Enable or disable new user registration." value={allowSignups} onChange={setAllowSignups} />
-              <ToggleRow label="Maintenance Mode" description="Show a maintenance page to all visitors." value={maintenanceMode} onChange={setMaintenanceMode} danger />
-            </div>
-          )}
+            )}
 
-          {activeSection === "security" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-white border-b border-white/10 pb-4">Security Settings</h3>
-              <ToggleRow label="Require Email Verification" description="New users must verify their email before accessing the platform." value={requireEmailVerification} onChange={setRequireEmailVerification} />
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground/70">Session Timeout (days)</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={90}
-                  value={sessionTimeout}
-                  onChange={e => setSessionTimeout(e.target.value)}
-                  className="w-full max-w-xs bg-background border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-admin-emerald/50 transition-colors"
+            {activeSection === "notifications" && (
+              <div className="space-y-6">
+                <Toggle 
+                  label="System Notifications" 
+                  description="Send alerts for platform-wide events."
+                  enabled={settings.adminAlerts}
+                  onChange={(val) => setSettings({ ...settings, adminAlerts: val })}
                 />
-                <p className="text-xs text-foreground/30">Users will be logged out after this many days of inactivity.</p>
+                <Toggle 
+                  label="New Signup Alerts" 
+                  description="Notify administrators of every new member."
+                  enabled={settings.newUserAlerts}
+                  onChange={(val) => setSettings({ ...settings, newUserAlerts: val })}
+                />
               </div>
-              <div className="p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
-                <Key className="w-4 h-4 text-yellow-500 mb-2" />
-                <p className="text-xs text-yellow-400/80 font-medium">JWT Secret and NextAuth Secret are managed via environment variables. Update them in your <code className="bg-white/10 px-1 rounded">.env.local</code> file.</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {activeSection === "notifications" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-white border-b border-white/10 pb-4">Notification Settings</h3>
-              <ToggleRow label="Admin Alerts" description="Receive system-level alerts in the admin notification dropdown." value={adminAlerts} onChange={setAdminAlerts} />
-              <ToggleRow label="New User Alerts" description="Create an admin notification whenever a new user signs up." value={newUserAlerts} onChange={setNewUserAlerts} />
-            </div>
-          )}
-
-          {activeSection === "database" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-white border-b border-white/10 pb-4">Database Info</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { label: "Database", value: "MongoDB Atlas" },
-                  { label: "Cluster", value: "kaptaaan" },
-                  { label: "Database Name", value: "skill-swap" },
-                  { label: "Connection", value: "✅ Connected" },
-                ].map(item => (
-                  <div key={item.label} className="p-4 bg-background rounded-xl border border-white/5">
-                    <p className="text-xs text-foreground/40 font-semibold uppercase tracking-wider mb-1">{item.label}</p>
-                    <p className="text-sm font-bold text-white">{item.value}</p>
+            {activeSection === "database" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-3">Default Max Swaps</label>
+                    <input 
+                      type="number" 
+                      value={settings.maxSwapsPerUser}
+                      onChange={(e) => setSettings({ ...settings, maxSwapsPerUser: parseInt(e.target.value) })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-admin-emerald/50 transition-all font-medium"
+                    />
                   </div>
-                ))}
+                  <div>
+                    <label className="block text-xs font-bold text-foreground/40 uppercase tracking-widest mb-3">Session Expiry (Days)</label>
+                    <input 
+                      type="number" 
+                      value={settings.sessionTimeout}
+                      onChange={(e) => setSettings({ ...settings, sessionTimeout: parseInt(e.target.value) })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-admin-emerald/50 transition-all font-medium"
+                    />
+                  </div>
+                </div>
+                <Toggle 
+                  label="Real-time Chat" 
+                  description="Enable/Disable P2P private messaging."
+                  enabled={settings.featureChat}
+                  onChange={(val) => setSettings({ ...settings, featureChat: val })}
+                />
+                <Toggle 
+                  label="Global Analytics" 
+                  description="Enable/Disable platform performance tracking."
+                  enabled={settings.featureAnalytics}
+                  onChange={(val) => setSettings({ ...settings, featureAnalytics: val })}
+                />
               </div>
-              <div className="p-4 bg-admin-blue/5 border border-admin-blue/20 rounded-xl">
-                <p className="text-xs text-admin-blue/80 font-medium">
-                  Database connection string is configured via <code className="bg-white/10 px-1 rounded">MONGODB_URI</code> environment variable. Never expose your connection string publicly.
-                </p>
-              </div>
+            )}
+
+            <div className="pt-6 border-t border-white/5 flex justify-end">
+              <DynamicButton
+                label={saving ? "Saving..." : "Save Changes"}
+                topDrawerText="💾 Persist Settings"
+                bottomDrawerText="Update Platform"
+                onClick={handleSave}
+                disabled={saving}
+              />
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function ToggleRow({ label, description, value, onChange, danger = false }: {
-  label: string;
-  description: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-  danger?: boolean;
-}) {
+function Toggle({ label, description, enabled, onChange }: { label: string, description: string, enabled: boolean, onChange: (val: boolean) => void }) {
   return (
-    <div className="flex items-start justify-between gap-6 py-4 border-b border-white/5 last:border-0">
+    <div className="flex items-center justify-between group">
       <div>
-        <p className={cn("text-sm font-semibold", danger ? "text-admin-rose" : "text-white")}>{label}</p>
-        <p className="text-xs text-foreground/40 mt-0.5 max-w-xs">{description}</p>
+        <p className="text-sm font-bold text-white group-hover:text-admin-emerald transition-colors">{label}</p>
+        <p className="text-xs text-foreground/40 mt-1 font-medium">{description}</p>
       </div>
-      <button
-        onClick={() => onChange(!value)}
+      <button 
+        onClick={() => onChange(!enabled)}
         className={cn(
-          "relative w-12 h-6 rounded-full transition-all duration-300 shrink-0 mt-0.5",
-          value
-            ? danger ? "bg-admin-rose" : "bg-admin-emerald"
-            : "bg-white/10"
+          "h-6 w-12 rounded-full relative transition-all duration-300",
+          enabled ? "bg-admin-emerald" : "bg-white/10"
         )}
       >
-        <span className={cn(
-          "absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-all duration-300",
-          value ? "translate-x-6" : "translate-x-0"
+        <div className={cn(
+          "absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300",
+          enabled ? "left-7" : "left-1"
         )} />
       </button>
     </div>

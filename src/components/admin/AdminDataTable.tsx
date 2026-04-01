@@ -111,7 +111,6 @@ export default function AdminDataTable<T extends { id: string }>({
                     </div>
                   </th>
                 ))}
-                <th className="px-6 py-4" /> {/* Action Column */}
               </tr>
             </thead>
 
@@ -130,14 +129,7 @@ export default function AdminDataTable<T extends { id: string }>({
                   >
                     {columns.map((column) => (
                       <td key={String(column.accessorKey)} className="px-6 py-4 text-sm font-medium text-foreground/80 group-hover:text-white transition-colors uppercase">{column.cell ? column.cell(item) : String((item as any)[column.accessorKey])}</td>
-                    ))}<td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => onAction?.(item)}
-                        className="p-2 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-white transition-all"
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </td>
+                    ))}
                   </motion.tr>
                 ))}
               </AnimatePresence>

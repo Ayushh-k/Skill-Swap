@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminKPICard from "@/components/admin/AdminKPICard";
 import AdminAnalyticsChart from "@/components/admin/AdminAnalyticsChart";
+import DynamicButton from "@/components/admin/DynamicButton";
 import { Users, ArrowLeftRight, Zap, Target, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useSocket } from "@/components/providers/SocketProvider";
 
 interface DashboardStats {
   metrics: {
@@ -23,8 +25,9 @@ interface DashboardStats {
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const { socket } = useSocket();
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/stats");
       const data = await res.json();
@@ -38,11 +41,25 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("join_admin");
+      socket.on("refresh_data", (data: { type: string }) => {
+        if (data.type === "all" || data.type === "users" || data.type === "swaps") {
+          fetchStats();
+        }
+      });
+      return () => {
+        socket.off("refresh_data");
+      };
+    }
+  }, [socket, fetchStats]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   if (loading && !stats) {
     return (
@@ -145,12 +162,14 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <button 
-            onClick={fetchStats}
-            className="mt-8 w-full py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-foreground/40 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest"
-          >
-            Refresh Intel
-          </button>
+          <div className="mt-8 flex justify-center">
+            <DynamicButton
+              label="Refresh Intel"
+              topDrawerText="↻ Sync Data"
+              bottomDrawerText="Live Stats"
+              onClick={fetchStats}
+            />
+          </div>
         </motion.div>
       </div>
     </div>

@@ -2,10 +2,21 @@
 
 import { useState, useEffect, useCallback } from "react";
 import AdminDataTable, { Column } from "@/components/admin/AdminDataTable";
-import { ShieldCheck, ShieldAlert, Mail, Calendar, Trash2, Ban as BanIcon, Loader2, X } from "lucide-react";
+import { 
+  ShieldCheck, 
+  ShieldAlert, 
+  Mail, 
+  Calendar, 
+  Trash2, 
+  Ban as BanIcon, 
+  Loader2, 
+  X,
+  MoreHorizontal
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSocket } from "@/components/providers/SocketProvider";
 
 interface UserRecord {
   id: string;
@@ -21,6 +32,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ type: "ban" | "delete"; user: UserRecord | null }>({ type: "ban", user: null });
+  const { socket } = useSocket();
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -37,6 +49,20 @@ export default function AdminUsersPage() {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("join_admin");
+      socket.on("refresh_data", (data: { type: string }) => {
+        if (data.type === "users" || data.type === "all") {
+          fetchUsers();
+        }
+      });
+      return () => {
+        socket.off("refresh_data");
+      };
+    }
+  }, [socket, fetchUsers]);
 
   useEffect(() => {
     fetchUsers();
@@ -65,6 +91,8 @@ export default function AdminUsersPage() {
         if (res.ok) {
           toast.success(`User ${user.name} is now ${newStatus}`);
           await fetchUsers();
+          // Emit internal refresh for other admin tabs
+          if (socket) socket.emit("admin_refresh", "users");
         } else {
           const data = await res.json();
           toast.error(data.error || "Failed to update user");
@@ -74,6 +102,7 @@ export default function AdminUsersPage() {
         if (res.ok) {
           toast.success(`User ${user.name} deleted permanently`);
           await fetchUsers();
+          if (socket) socket.emit("admin_refresh", "users");
         } else {
           const data = await res.json();
           toast.error(data.error || "Failed to delete user");
@@ -156,35 +185,7 @@ export default function AdminUsersPage() {
     {
       header: "Actions",
       accessorKey: "actions",
-      cell: (user) => (
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAction("ban", user);
-            }}
-            title={user.status === "banned" ? "Unban User" : "Ban User"}
-            className={cn(
-              "p-2 rounded-lg border transition-all",
-              user.status === "banned" 
-                ? "bg-admin-emerald/10 border-admin-emerald/20 text-admin-emerald hover:bg-admin-emerald/20" 
-                : "bg-white/5 border-white/10 text-foreground/40 hover:text-admin-rose hover:border-admin-rose/20 hover:bg-admin-rose/5"
-            )}
-          >
-            <BanIcon className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAction("delete", user);
-            }}
-            title="Delete User"
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-foreground/40 hover:text-admin-rose hover:border-admin-rose/20 hover:bg-admin-rose/5 transition-all"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      )
+      cell: (user) => <ActionMenu user={user} onAction={handleAction} />
     }
   ];
 
@@ -213,11 +214,8 @@ export default function AdminUsersPage() {
           data={users} 
           searchPlaceholder="Filter users by name or email..."
           onAction={(user) => {
-            // Optional: Show dropdown or direct action. For now, we'll provide internal action buttons in the cell if needed,
-            // or just use this generic onAction for 'Details'
             toast.info(`Viewing details for ${user.name}`);
           }}
-          // We'll append custom action buttons to the table by adding a new column 'Actions'
         />
       )}
 
@@ -256,7 +254,7 @@ export default function AdminUsersPage() {
                  pendingAction.user?.status === "banned" ? "Unban User?" : "Ban User?"}
               </h3>
               <p className="text-foreground/40 font-medium mb-8">
-                Are you sure you want to {pendingAction.type === "delete" ? "permanently delete" : "change the status for"} 
+                Are you sure you want to {pendingAction.type === "delete" ? "permanently delete" : "change the status for" } 
                 <span className="text-white ml-1 font-bold">{pendingAction.user?.name}</span>? 
                 {pendingAction.type === "delete" && " This action cannot be undone."}
               </p>
@@ -283,25 +281,66 @@ export default function AdminUsersPage() {
           </div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
 
-      {/* Add custom action buttons to the table row by mapping in the Users Page */}
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          height: 8px;
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
-      `}</style>
+function ActionMenu({ user, onAction }: { user: UserRecord, onAction: (type: "ban" | "delete", user: UserRecord) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClose = () => setIsOpen(false);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, [isOpen]);
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        className="p-2 rounded-lg hover:bg-white/5 text-foreground/40 hover:text-white transition-all shadow-sm"
+      >
+        <MoreHorizontal className="w-4 h-4" />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="absolute right-0 mt-2 w-48 rounded-xl bg-admin-surface border border-white/10 shadow-2xl z-[100] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-1">
+              <button
+                onClick={() => {
+                  onAction("ban", user);
+                  setIsOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-foreground/60 hover:text-white hover:bg-white/5 transition-all"
+              >
+                <BanIcon className="w-4 h-4" />
+                {user.status === "banned" ? "Unban User" : "Ban User"}
+              </button>
+              <button
+                onClick={() => {
+                  onAction("delete", user);
+                  setIsOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold text-admin-rose/60 hover:text-admin-rose hover:bg-admin-rose/10 transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete User
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
