@@ -79,10 +79,15 @@ export default function AdminDataTable<T extends { id: string }>({
         </div>
         
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-admin-surface border border-white/10 rounded-xl text-sm font-medium text-foreground/60 hover:text-white hover:bg-white/5 transition-all">
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
+          <select 
+            className="bg-admin-surface border border-white/10 rounded-xl px-3 py-2.5 text-xs font-medium text-foreground/60 focus:outline-none focus:ring-2 focus:ring-admin-emerald/20 transition-all hover:text-white"
+            onChange={(e) => setSearchQuery(e.target.value === "all" ? "" : e.target.value)}
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="banned">Banned</option>
+            <option value="pending">Pending</option>
+          </select>
         </div>
       </div>
 

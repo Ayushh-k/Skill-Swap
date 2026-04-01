@@ -26,24 +26,29 @@ const menuItems = [
   { icon: Settings,        label: "Settings",  href: "/admin/settings" },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ 
+  mobileOpen, 
+  setMobileOpen 
+}: { 
+  mobileOpen?: boolean; 
+  setMobileOpen?: (open: boolean) => void;
+}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
 
   // Close mobile menu on route change
   useEffect(() => {
-    setIsMobileOpen(false);
-  }, [pathname]);
+    if (setMobileOpen) setMobileOpen(false);
+  }, [pathname, setMobileOpen]);
 
   // Close mobile menu on resize to desktop
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) setIsMobileOpen(false);
+      if (window.innerWidth >= 1024 && setMobileOpen) setMobileOpen(false);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [setMobileOpen]);
 
   const NavLinks = () => (
     <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
@@ -83,31 +88,25 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* ── MOBILE HAMBURGER BUTTON ── */}
-      <button
-        onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 h-10 w-10 rounded-xl bg-admin-surface border border-white/10 flex items-center justify-center text-white shadow-xl"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+      {/* Mobile Drawer (External Triggered) */}
 
       {/* ── MOBILE DRAWER OVERLAY ── */}
       <AnimatePresence>
-        {isMobileOpen && (
+        {mobileOpen && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
-              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
+              onClick={() => setMobileOpen?.(false)}
             />
             <motion.aside
               initial={{ x: -280 }}
               animate={{ x: 0 }}
               exit={{ x: -280 }}
-              transition={{ type: "spring", damping: 28, stiffness: 250 }}
-              className="lg:hidden fixed left-0 top-0 h-screen w-[260px] bg-admin-surface border-r border-white/10 flex flex-col z-50 shadow-2xl"
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-admin-surface border-r border-white/10 flex flex-col z-[70] shadow-2xl"
             >
               {/* Header */}
               <div className="h-16 flex items-center justify-between px-5 border-b border-white/10">
@@ -117,7 +116,7 @@ export default function AdminSidebar() {
                   </div>
                   <span className="font-heading font-bold text-lg tracking-tight text-white">Admin Panel</span>
                 </div>
-                <button onClick={() => setIsMobileOpen(false)} className="text-foreground/40 hover:text-white transition-colors">
+                <button onClick={() => setMobileOpen?.(false)} className="text-foreground/40 hover:text-white transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>

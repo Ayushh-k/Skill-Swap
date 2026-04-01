@@ -11,8 +11,10 @@ import {
   Ban as BanIcon, 
   Loader2, 
   X,
-  MoreHorizontal
+  MoreHorizontal,
+  RefreshCw
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -191,17 +193,22 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Users</h2>
-          <p className="text-foreground/40 font-medium mt-1">Manage platform members and their membership status.</p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight border-l-4 border-admin-emerald pl-4">Platform Users</h2>
+          <p className="text-foreground/40 font-medium text-sm sm:text-base">Manage platform members and their membership status.</p>
         </div>
-        <button 
+        <Button 
+          variant="premium"
+          topDrawer="↻ Sync"
+          bottomDrawer="Live Data"
           onClick={fetchUsers}
-          className="p-2.5 bg-admin-surface border border-white/10 text-foreground/60 rounded-xl hover:text-white hover:bg-white/5 transition-all"
+          className="w-full sm:w-auto"
+          isLoading={loading && users.length > 0}
         >
-          <Loader2 className={cn("w-5 h-5", loading && "animate-spin")} />
-        </button>
+          <RefreshCw className={cn("w-4 h-4 mr-2", loading && "animate-spin")} />
+          Sync Intel
+        </Button>
       </div>
 
       {loading && users.length === 0 ? (

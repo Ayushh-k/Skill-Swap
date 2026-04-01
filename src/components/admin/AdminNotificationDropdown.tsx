@@ -110,7 +110,10 @@ export default function AdminNotificationDropdown() {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="absolute right-0 mt-4 w-96 bg-admin-surface border border-white/10 rounded-3xl shadow-2xl overflow-hidden shadow-black/50 z-20"
+            className={cn(
+              "fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-4 sm:w-96",
+              "bg-admin-surface border border-white/10 rounded-3xl shadow-2xl overflow-hidden shadow-black/50 z-[100]"
+            )}
           >
             <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
               <div>
