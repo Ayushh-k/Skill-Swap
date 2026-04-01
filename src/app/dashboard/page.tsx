@@ -176,19 +176,20 @@ export default function Dashboard() {
 
                 {/* Actions for receiver of a pending swap */}
                 {!isRequester && swap.status === "pending" && (
-                  <div className="flex gap-3 mt-auto pt-2">
+                  <div className="flex flex-col gap-3 mt-auto pt-2">
                      <Button 
+                      variant="premium"
                       onClick={() => handleStatusUpdate(swap._id, "accepted")}
-                      className="flex-1 bg-accent-teal hover:bg-accent-teal/90 text-background font-bold h-10 border-0 shadow-lg shadow-accent-teal/20"
+                      className="w-full h-10"
                     >
-                      <CheckCircle className="mr-2 h-4 w-4" /> Accept
+                      <CheckCircle className="mr-2 h-4 w-4" /> Accept Swap
                     </Button>
                     <Button 
                       variant="outline"
                       onClick={() => handleStatusUpdate(swap._id, "rejected")}
-                      className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10 h-10"
+                      className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10 h-10"
                     >
-                      <XCircle className="mr-2 h-4 w-4" /> Reject
+                      <XCircle className="mr-2 h-4 w-4" /> Reject Request
                     </Button>
                   </div>
                 )}
@@ -197,11 +198,11 @@ export default function Dashboard() {
                 {swap.status === "accepted" && (
                   <div className="mt-auto pt-4 flex flex-col gap-3">
                     <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-accent-teal/10 border border-accent-teal/20 text-accent-teal text-sm text-center">
-                      <p className="font-semibold mb-1">Swap Accepted!</p>
-                      <p className="text-xs text-accent-teal/80">Connect in the real-time chat room below.</p>
+                      <p className="font-semibold mb-1 text-xs">Swap Accepted!</p>
+                      <p className="text-[10px] text-accent-teal/80">Connect in the real-time chat room below.</p>
                     </div>
                     <Link href={`/swap/${swap._id}`} className="w-full">
-                      <Button variant="premium" topDrawer="Open Chat" className="w-full h-11">
+                      <Button variant="premium" className="w-full h-11">
                         Enter Chat Room
                       </Button>
                     </Link>

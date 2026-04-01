@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Shield, Bell, Database, Globe, Key, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import DynamicButton from "@/components/admin/DynamicButton";
 
 const SECTIONS = [
@@ -212,13 +213,21 @@ export default function AdminSettingsPage() {
             )}
 
             <div className="pt-6 border-t border-white/5 flex justify-end">
-              <DynamicButton
-                label={saving ? "Saving..." : "Save Changes"}
-                topDrawerText="💾 Persist Settings"
-                bottomDrawerText="Update Platform"
+              <Button
+                variant="premium"
                 onClick={handleSave}
                 disabled={saving}
-              />
+                className="w-[180px] h-12"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
             </div>
           </div>
         </div>
