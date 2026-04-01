@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useSocket } from "@/components/providers/SocketProvider";
+import { useSession } from "next-auth/react";
 
 type SwapType = {
   _id: string;
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [swaps, setSwaps] = useState<SwapType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string>("");
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "admin";
 
   const { socket } = useSocket();
 
@@ -102,6 +105,16 @@ export default function Dashboard() {
       <div className="absolute top-[20%] left-[5%] w-[40vw] h-[40vw] rounded-full bg-accent-indigo/10 blur-[150px] -z-10 pointer-events-none" />
 
       <h1 className="font-heading text-3xl md:text-4xl font-bold text-white mb-8 tracking-tight text-center sm:text-left">Your Dashboard</h1>
+
+      {/* Admin Panel access button */}
+      {isAdmin && (
+        <Link href="/admin/dashboard" className="inline-flex mb-6">
+          <span className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-400 font-semibold text-sm hover:bg-amber-500/20 hover:scale-[1.02] transition-all shadow-lg shadow-amber-500/5">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            🛡️ Admin Panel
+          </span>
+        </Link>
+      )}
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">

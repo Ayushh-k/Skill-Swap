@@ -31,7 +31,7 @@ export default function AdminSidebar() {
     <motion.aside
       initial={false}
       animate={{ width: isCollapsed ? 80 : 260 }}
-      className="h-screen bg-admin-surface border-r border-white/10 flex flex-col relative z-20 transition-all duration-300"
+      className="h-screen max-h-screen bg-admin-surface border-r border-white/10 flex flex-col relative z-20 overflow-hidden"
     >
       {/* Brand Header */}
       <div className="h-16 flex items-center px-6 border-b border-white/10">
@@ -47,8 +47,8 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+      {/* Navigation — scrolls internally if there are many items */}
+      <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto overflow-x-hidden custom-scrollbar">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
