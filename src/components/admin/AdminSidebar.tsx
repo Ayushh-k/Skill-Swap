@@ -139,7 +139,7 @@ export default function AdminSidebar({
       initial={false}
       animate={{ width: isCollapsed ? 72 : 240 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="hidden lg:flex h-screen max-h-screen bg-admin-surface border-r border-white/10 flex-col relative z-20 overflow-hidden shrink-0"
+      className="hidden lg:flex h-full bg-admin-surface border-r border-white/10 flex-col relative z-20 overflow-hidden shrink-0"
     >
       <div className="h-16 flex items-center px-4 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3 overflow-hidden">
