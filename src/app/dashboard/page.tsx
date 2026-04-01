@@ -108,11 +108,10 @@ export default function Dashboard() {
 
       {/* Admin Panel access button */}
       {isAdmin && (
-        <Link href="/admin/dashboard" className="inline-flex mb-6">
-          <span className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-400 font-semibold text-sm hover:bg-amber-500/20 hover:scale-[1.02] transition-all shadow-lg shadow-amber-500/5">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        <Link href="/admin/dashboard" className="inline-flex mb-8">
+          <Button variant="premium" topDrawer="System Access">
             🛡️ Admin Panel
-          </span>
+          </Button>
         </Link>
       )}
 
@@ -202,7 +201,7 @@ export default function Dashboard() {
                       <p className="text-xs text-accent-teal/80">Connect in the real-time chat room below.</p>
                     </div>
                     <Link href={`/swap/${swap._id}`} className="w-full">
-                      <Button className="w-full bg-gradient-to-r from-accent-indigo to-accent-teal hover:opacity-90 text-white font-bold h-11 border-0 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all">
+                      <Button variant="premium" topDrawer="Open Chat" className="w-full h-11">
                         Enter Chat Room
                       </Button>
                     </Link>

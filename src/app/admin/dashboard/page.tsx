@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import AdminKPICard from "@/components/admin/AdminKPICard";
 import AdminAnalyticsChart from "@/components/admin/AdminAnalyticsChart";
-import DynamicButton from "@/components/admin/DynamicButton";
+import { Button } from "@/components/ui/button";
 import { Users, ArrowLeftRight, Zap, Target, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -163,12 +163,14 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="mt-8 flex justify-center">
-            <DynamicButton
-              label="Refresh Intel"
-              topDrawerText="↻ Sync Data"
-              bottomDrawerText="Live Stats"
+            <Button
+              variant="premium"
+              topDrawer="↻ Sync Data"
+              bottomDrawer="Live Stats"
               onClick={fetchStats}
-            />
+            >
+              Refresh Intel
+            </Button>
           </div>
         </motion.div>
       </div>

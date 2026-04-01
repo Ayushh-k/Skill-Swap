@@ -132,8 +132,10 @@ export default function Navbar() {
               </Link>
             )}
             {user?.role === "admin" && (
-              <Link href="/admin/dashboard" className="text-sm font-medium text-admin-emerald hover:text-admin-emerald/80 transition-colors">
-                Administration
+              <Link href="/admin/dashboard">
+                <Button variant="premium" topDrawer="Admin Panel" className="!min-width-[120px] !px-4">
+                  Administration
+                </Button>
               </Link>
             )}
           </div>
@@ -217,7 +219,7 @@ export default function Navbar() {
                       <Button variant="ghost" size="sm">Log in</Button>
                     </Link>
                     <Link href="/signup">
-                      <Button size="sm">Sign up</Button>
+                      <Button variant="premium" topDrawer="Join Now">Sign up</Button>
                     </Link>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="xs:hidden px-2 text-white">
