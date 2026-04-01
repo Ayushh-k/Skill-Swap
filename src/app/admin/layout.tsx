@@ -12,15 +12,18 @@ export default function AdminLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="admin-theme h-screen overflow-hidden flex text-foreground selection:bg-admin-emerald/30">
-      {/* Persistent Sidebar — hidden on mobile, fixed on desktop */}
-      <div className="h-screen sticky top-0 shrink-0">
-        <AdminSidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
+    <div className="admin-theme min-h-screen flex text-foreground selection:bg-admin-emerald/30 bg-background relative overflow-x-hidden">
+      {/* Mobile Drawer (Portal-like Top Level) */}
+      <AdminSidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
+
+      {/* Persistent Desktop Sidebar */}
+      <div className="hidden lg:block h-screen sticky top-0 shrink-0 z-20">
+        <AdminSidebar />
       </div>
 
-      {/* Main Content Pane — only this scrolls */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <AdminTopbar onMenuClick={() => setMobileMenuOpen(true)} />
+      {/* Main Content Pane */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        <AdminTopbar onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
         
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto custom-scrollbar relative pt-20 lg:pt-6">
           {/* Subtle background glows */}
