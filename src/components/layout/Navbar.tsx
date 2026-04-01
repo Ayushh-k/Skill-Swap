@@ -131,13 +131,6 @@ export default function Navbar() {
                 Dashboard
               </Link>
             )}
-            {user?.role === "admin" && (
-              <Link href="/admin/dashboard">
-                <Button variant="premium" topDrawer="Admin Panel" className="!min-width-[120px] !px-4">
-                  Administration
-                </Button>
-              </Link>
-            )}
           </div>
           
           <div className="flex items-center gap-2">
@@ -219,7 +212,7 @@ export default function Navbar() {
                       <Button variant="ghost" size="sm">Log in</Button>
                     </Link>
                     <Link href="/signup">
-                      <Button variant="premium" topDrawer="Join Now">Sign up</Button>
+                      <Button variant="premium">Sign up</Button>
                     </Link>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="xs:hidden px-2 text-white">
@@ -243,11 +236,6 @@ export default function Navbar() {
               <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-foreground hover:text-white transition-colors py-2 border-b border-white/5">
                 Dashboard
               </Link>
-              {user?.role === "admin" && (
-                <Link href="/admin/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-admin-emerald hover:text-admin-emerald/80 transition-colors py-2 border-b border-white/5">
-                  Administration
-                </Link>
-              )}
               <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-foreground hover:text-white transition-colors py-2 border-b border-white/5">
                 My Profile
               </Link>
@@ -261,10 +249,10 @@ export default function Navbar() {
           ) : (
             <div className="flex flex-col gap-3 pt-2">
               <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="premium" topDrawer="Welcome" className="w-full">Log in</Button>
+                <Button variant="premium" className="w-full">Log in</Button>
               </Link>
               <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="premium" topDrawer="Join Now" className="w-full">Sign up</Button>
+                <Button variant="premium" className="w-full">Sign up</Button>
               </Link>
             </div>
           )}

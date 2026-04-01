@@ -218,8 +218,6 @@ export default function Explore() {
 
                 <Button 
                   variant="premium"
-                  topDrawer="Let's Swap"
-                  bottomDrawer="Expert Help"
                   className="w-full mt-6 h-11"
                   onClick={() => { setSelectedUser(user); setIsModalOpen(true); }}
                 >
@@ -279,7 +277,6 @@ export default function Explore() {
             <Button variant="ghost" className="flex-1" onClick={() => setIsProfileModalOpen(false)}>Close</Button>
             <Button 
                variant="premium"
-               topDrawer="Start Now"
                className="flex-1" 
                onClick={() => {
                  setIsProfileModalOpen(false);
@@ -332,7 +329,6 @@ export default function Explore() {
             <Button 
               type="submit" 
               variant="premium"
-              topDrawer="Sending..."
               isLoading={isSubmitting}
             >
               Send Request

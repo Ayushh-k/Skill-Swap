@@ -14,27 +14,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", isLoading, children, topDrawer, bottomDrawer, ...props }, ref) => {
     if (variant === "premium") {
       return (
-        <div className={cn("premium-btn-container", className)}>
-          {topDrawer && <div className="btn-premium-drawer drawer-top">{topDrawer}</div>}
-          <button
-            ref={ref}
-            disabled={isLoading || props.disabled}
-            className="btn-premium"
-            {...props}
-          >
-            {/* SVG Corners */}
-            {[...Array(4)].map((_, i) => (
-              <svg key={i} className="btn-premium-corner" viewBox="0 0 32 32" width="32" height="32">
-                <path d="M0 16 Q0 0 16 0" strokeWidth="2" />
-              </svg>
-            ))}
-            
-            <span className="btn-premium-text">
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
-            </span>
-          </button>
-          {bottomDrawer && <div className="btn-premium-drawer drawer-bottom">{bottomDrawer}</div>}
-        </div>
+        <button
+          ref={ref}
+          disabled={isLoading || props.disabled}
+          className={cn("btn-premium", className)}
+          {...props}
+        >
+          <span className="btn-premium-text">
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin shrink-0" />}
+            {children}
+          </span>
+        </button>
       )
     }
 

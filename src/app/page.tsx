@@ -55,13 +55,13 @@ export default function Home() {
 
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
               <Link href="/signup" className="w-full sm:w-auto">
-                <Button variant="premium" topDrawer="Let's Go!" className="w-full sm:w-auto group">
+                <Button variant="premium" className="w-full sm:w-auto group">
                   Start Exploring
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button variant="premium" bottomDrawer="View Stats" className="w-full sm:w-auto">
+                <Button variant="premium" className="w-full sm:w-auto">
                   Go to Dashboard
                 </Button>
               </Link>

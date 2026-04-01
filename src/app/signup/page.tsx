@@ -199,8 +199,6 @@ export default function SignupPage() {
               <Button 
                 type="submit" 
                 variant="premium"
-                topDrawer="Join Now"
-                bottomDrawer="100% Free"
                 className="w-full h-12 mt-4" 
                 isLoading={isLoading}
               >

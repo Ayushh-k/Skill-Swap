@@ -178,8 +178,6 @@ export default function LoginPage() {
             <Button 
               type="submit" 
               variant="premium"
-              topDrawer="Welcome Back"
-              bottomDrawer="Secure Login"
               className="w-full h-12" 
               isLoading={isLoading}
             >
