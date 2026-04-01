@@ -5,39 +5,44 @@ export default withAuth(
   async function middleware(req) {
     const token = req.nextauth.token;
     const isAuth = !!token;
-    const url = req.nextUrl.clone();
-    const { pathname } = url;
+    const { pathname } = req.nextUrl;
+    const isAdmin = token?.role === "admin";
 
-    // 1. Skip checks for essential paths
+    // 1. Skip checks for essential/system paths
     if (
       pathname.startsWith("/api") || 
       pathname.startsWith("/_next") || 
       pathname.startsWith("/maintenance") ||
-      pathname.includes(".") // static files
+      pathname.includes(".") // static files like favicon.ico, images, etc.
     ) {
       return NextResponse.next();
     }
 
-    // 2. Admin Protection
+    // 2. Admin Protection (Redirects to login if not admin)
     if (pathname.startsWith("/admin")) {
       if (!isAuth) {
         return NextResponse.redirect(new URL("/login", req.url));
       }
-      if (token.role !== "admin") {
+      if (!isAdmin) {
         return NextResponse.redirect(new URL("/", req.url));
       }
       return NextResponse.next();
     }
 
     // 3. Maintenance Mode Check (Global)
+    // We fetch the status from our internal API which checks the DB
     try {
       const maintenanceRes = await fetch(`${req.nextUrl.origin}/api/admin/maintenance`, {
-        next: { revalidate: 60 } // Cache for 60 seconds
+        next: { revalidate: 30 } // Cache for 30 seconds
       });
       const { maintenanceMode } = await maintenanceRes.json();
 
-      if (maintenanceMode && token?.role !== "admin") {
-        return NextResponse.redirect(new URL("/maintenance", req.url));
+      if (maintenanceMode && !isAdmin) {
+        // Redirect non-admins to maintenance page
+        // We ensure we don't redirect if already on login (optional, but good for UX)
+        if (pathname !== "/login") {
+           return NextResponse.redirect(new URL("/maintenance", req.url));
+        }
       }
     } catch (e) {
       console.error("Maintenance check failed:", e);
@@ -48,7 +53,6 @@ export default withAuth(
   {
     callbacks: {
       async authorized() {
-        // This is a dummy return to allow the middleware function above to run
         return true;
       },
     },
@@ -56,5 +60,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/profile/:path*", "/swap/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

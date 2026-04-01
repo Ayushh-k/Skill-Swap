@@ -18,15 +18,26 @@ export const metadata: Metadata = {
   description: "A bespoke premium platform for swapping skills seamlessly.",
 };
 
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import dbConnect from "@/lib/db";
+import { Settings } from "@/models/Settings";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import { SocketProvider } from "@/components/providers/SocketProvider";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // We keep the DB connection and session check for potential future use in the layout,
+  // but we remove the problematic redirect() that caused the loop.
+  // Global maintenance redirection will be handled more reliably in middleware.ts.
+  await dbConnect();
+  
   return (
     <html
       lang="en"
