@@ -55,28 +55,39 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (!user.email) return false;
+      if (!user.email) {
+        console.error("OAuth: Signin failed - No email provided by provider");
+        return false;
+      }
       
       // For Credentials provider, we already retrieved the user from DB in authorize()
       if (account?.provider === "credentials") {
         return true;
       }
       
-      await dbConnect();
-      
-      let existingUser = await User.findOne({ email: user.email as string });
-      
-      if (!existingUser) {
-        existingUser = await User.create({
-          name: user.name || user.email.split("@")[0],
-          email: user.email as string,
-          avatar: user.image || undefined,
-        });
+      try {
+        await dbConnect();
+        
+        let existingUser = await User.findOne({ email: user.email as string });
+        
+        if (!existingUser) {
+          console.log(`OAuth: Creating new user for ${user.email}`);
+          existingUser = await User.create({
+            name: user.name || user.email.split("@")[0],
+            email: user.email as string,
+            avatar: user.image || undefined,
+            role: "user",
+            status: "active"
+          });
+        }
+        
+        (user as any).id = existingUser._id.toString();
+        (user as any).role = existingUser.role || "user";
+        return true;
+      } catch (err: any) {
+        console.error("OAuth: Error in signIn callback:", err.message);
+        return false;
       }
-      
-      (user as any).id = existingUser._id.toString();
-      (user as any).role = existingUser.role || "user";
-      return true;
     },
     async session({ session, token }) {
       if (session.user && token.sub) {

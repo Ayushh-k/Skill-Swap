@@ -8,10 +8,43 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Sparkles, Eye, EyeOff } from "lucide-react";
-import { signIn, getSession } from "next-auth/react";
+import { signIn, getSession, useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { status } = useSession();
+  
+  const error = searchParams.get("error");
+  
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (error) {
+      const errorMessages: Record<string, string> = {
+        Signin: "Try signing in with a different account.",
+        OAuthSignin: "Try signing in with a different account.",
+        OAuthCallback: "There was a problem with the login callback.",
+        OAuthCreateAccount: "Could not create user in database.",
+        EmailCreateAccount: "Could not create user in database.",
+        Callback: "There was a problem with the login callback.",
+        OAuthAccountNotLinked: "This email is already associated with another login method.",
+        EmailSignin: "The e-mail could not be sent.",
+        CredentialsSignin: "Sign in failed. Check the details you provided.",
+        SessionRequired: "Please sign in to access this page.",
+        Default: "An unexpected authentication error occurred."
+      };
+      toast.error(errorMessages[error] || errorMessages.Default);
+    }
+  }, [error]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -194,5 +227,13 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-white/50 animate-pulse">Initializing...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -9,9 +9,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Zap, Eye, EyeOff, ShieldCheck, Mail, ArrowRight } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { status } = useSession();
+  const error = searchParams.get("error");
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (error) {
+       toast.error("An error occurred during authentication. Please try again.");
+    }
+  }, [error]);
+
   const { update } = useSession();
   
   // Data State
@@ -213,5 +231,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-white/50 animate-pulse">Initializing...</div>}>
+       <SignupContent />
+    </Suspense>
   );
 }

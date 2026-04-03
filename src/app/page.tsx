@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles, Zap, ShieldCheck, UserPlus, Search, MessageSquare, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -23,6 +24,10 @@ const itemVariants = {
 };
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const isAuth = !!session;
+  const isLoading = status === "loading";
+
   return (
     <div className="relative overflow-hidden flex-1">
         {/* Background Gradients */}
@@ -54,11 +59,21 @@ export default function Home() {
             </motion.p>
 
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
-              <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button variant="premium" className="w-full sm:w-auto">
-                  Go to Dashboard
-                </Button>
-              </Link>
+              {!isLoading && (
+                isAuth ? (
+                  <Link href="/dashboard" className="w-full sm:w-auto">
+                    <Button variant="premium" className="w-full sm:w-auto shadow-[0_0_20px_rgba(79,70,229,0.4)]">
+                      Go to Dashboard <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/signup" className="w-full sm:w-auto">
+                    <Button variant="premium" className="w-full sm:w-auto shadow-[0_0_20px_rgba(20,184,166,0.4)]">
+                      Join the Community <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
+                )
+              )}
             </motion.div>
           </motion.div>
 
