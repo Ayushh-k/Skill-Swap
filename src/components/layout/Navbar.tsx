@@ -20,6 +20,25 @@ export default function Navbar() {
   const [dismissedCount, setDismissedCount] = useState(0);
   const [dbAvatar, setDbAvatar] = useState<string | null>(null);
   const isInitialFetch = useRef(true);
+  const prevShowNotifs = useRef(false);
+
+  // Sync "Read" status when panel is CLOSED
+  useEffect(() => {
+    if (prevShowNotifs.current === true && showNotifs === false) {
+      if (unread.messages.length > 0) {
+        fetch("/api/messages/read", { method: "POST", body: JSON.stringify({}) })
+          .then(() => {
+            setUnread(prev => ({ count: 0, messages: prev.messages }));
+            setDismissedCount(0);
+            if (typeof window !== "undefined") {
+              window.localStorage.setItem("skillswap_dismissed_notifs", "0");
+            }
+          })
+          .catch(() => {});
+      }
+    }
+    prevShowNotifs.current = showNotifs;
+  }, [showNotifs, unread.messages.length]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -73,6 +92,11 @@ export default function Navbar() {
         fetch("/api/messages/unread")
           .then(res => res.json())
           .then(data => {
+             if (showNotifs && data.messages.length === 0 && unread.messages.length > 0) {
+                // If panel is open and new poll says 0, it means they were marked as read elsewhere
+                // or the poll hit right after we opened. We keep current messages to avoid "vanishing".
+                return;
+             }
              setUnread((prev) => {
                setDismissedCount(currentDismissed => {
                  let newDismissed = currentDismissed;
@@ -138,17 +162,7 @@ export default function Navbar() {
               user ? (
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="relative">
-                    <Button variant="ghost" onClick={() => { 
-                      setShowNotifs(!showNotifs); 
-                      if (!showNotifs && unread.messages.length > 0) {
-                         fetch("/api/messages/read", { method: "POST", body: JSON.stringify({}) });
-                         setUnread(prev => ({ count: 0, messages: prev.messages }));
-                         setDismissedCount(0);
-                         if (typeof window !== "undefined") {
-                            window.localStorage.setItem("skillswap_dismissed_notifs", "0");
-                         }
-                      }
-                    }} className="relative text-white hover:bg-white/10 px-0 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full">
+                    <Button variant="ghost" onClick={() => setShowNotifs(!showNotifs)} className="relative text-white hover:bg-white/10 px-0 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full">
                       <Bell className="w-5 h-5" />
                       {Math.max(0, unread.count - dismissedCount) > 0 && (
                          <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center shadow-md border border-background">
@@ -158,8 +172,11 @@ export default function Navbar() {
                     </Button>
                     
                     {showNotifs && (
-                      <div className="fixed top-20 left-4 right-4 w-auto sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-[#0A0A0A] border rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 z-[100] animate-in fade-in slide-in-from-top-2 duration-200" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
-                        <h3 className="text-sm font-bold text-white border-b border-white/10 pb-2">Unread Messages</h3>
+                      <div className="fixed top-20 left-4 right-4 w-auto sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-80 bg-[#0A0A0A] border rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col z-[100] animate-in fade-in slide-in-from-top-2 duration-200" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+                        <div className="p-4 border-b border-white/10">
+                          <h3 className="text-sm font-bold text-white">Unread Messages</h3>
+                        </div>
+                        <div className="p-4 pt-2 max-h-[350px] overflow-y-auto custom-scrollbar flex flex-col gap-3">
                         {unread.messages.length === 0 ? (
                           <p className="text-xs text-foreground/50 text-center py-4">No new notifications</p>
                         ) : (
@@ -173,6 +190,7 @@ export default function Navbar() {
                             </Link>
                           ))
                         )}
+                        </div>
                       </div>
                     )}
                   </div>
