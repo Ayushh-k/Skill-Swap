@@ -15,7 +15,8 @@ async function seedAdmin() {
   await mongoose.connect(MONGODB_URI);
   console.log("Connected to MongoDB");
 
-  const adminEmail = "admin@skillswap.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@skillswap.com";
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
   const existingAdmin = await User.findOne({ email: adminEmail });
 
   if (existingAdmin) {
@@ -23,7 +24,7 @@ async function seedAdmin() {
     process.exit(0);
   }
 
-  const hashedPassword = await bcrypt.hash("admin123", 12);
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
   
   await User.create({
     name: "System Administrator",
@@ -36,8 +37,7 @@ async function seedAdmin() {
   });
 
   console.log("Admin user created successfully!");
-  console.log("Email: admin@skillswap.com");
-  console.log("Password: admin123");
+  console.log(`Email: ${adminEmail}`);
   
   process.exit(0);
 }

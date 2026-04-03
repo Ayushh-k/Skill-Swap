@@ -31,7 +31,9 @@ export default withAuth(
     }
 
     // 3. Admin Protection (Redirects to home if not admin)
+    // Strictly enforce that /admin routes require the admin role
     if (pathname.startsWith("/admin") && !isAdmin) {
+      console.warn(`Unauthorized access attempt to ${pathname} by user ${token?.email}`);
       return NextResponse.redirect(new URL("/", req.url));
     }
 

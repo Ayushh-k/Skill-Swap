@@ -8,10 +8,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Sparkles, Eye, EyeOff } from "lucide-react";
-import { signIn, getSession, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { Suspense } from "react";
+import { useEffect, Suspense } from "react";
 
 function LoginContent() {
   const router = useRouter();
@@ -53,7 +52,6 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdminLoading, setIsAdminLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -75,26 +73,6 @@ function LoginContent() {
       toast.error(err.message || "An error occurred");
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function handleAdminLogin() {
-    setIsAdminLoading(true);
-    try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email: "admin@skillswap.com",
-        password: "admin123",
-      });
-      if (res?.error) {
-        toast.error("Admin login failed. Make sure the admin account is seeded.");
-      } else {
-        router.push("/admin/dashboard");
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Admin login error");
-    } finally {
-      setIsAdminLoading(false);
     }
   }
 
@@ -212,7 +190,7 @@ function LoginContent() {
               className="w-full h-12" 
               isLoading={isLoading}
             >
-              Log back in
+              Sign In
             </Button>
           </form>
 
