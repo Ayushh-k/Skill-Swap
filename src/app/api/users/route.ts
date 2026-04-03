@@ -11,10 +11,12 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    await dbConnect();
-    
-    // Fetch all users except the current user
-    const users = await User.find({ _id: { $ne: userPayload.id } }).select(
+    // Fetch all active users with the "user" role, excluding the current user
+    const users = await User.find({ 
+      _id: { $ne: userPayload.id },
+      role: "user",
+      status: "active"
+    }).select(
       "name email avatar skillsOffered skillsWanted bio"
     ).lean();
 
