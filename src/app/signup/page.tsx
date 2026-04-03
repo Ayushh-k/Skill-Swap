@@ -15,14 +15,18 @@ import { useEffect, Suspense } from "react";
 function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const error = searchParams?.get("error");
 
   useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
+    if (status === "authenticated" && session) {
+      if ((session.user as any)?.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   useEffect(() => {
     if (error) {
@@ -66,13 +70,15 @@ function SignupContent() {
       
       // Auto-login after successful signup using NextAuth
       const signInRes = await signIn("credentials", {
-        redirect: true,
+        redirect: false,
         email,
         password,
-        callbackUrl: "/dashboard"
       });
 
-      if (signInRes?.error) {
+      if (signInRes?.ok) {
+        toast.success("Account created! Redirecting...");
+        router.refresh();
+      } else {
         toast.error("Account created, but automatic login failed. Please log in manually.");
         router.push("/login");
       }

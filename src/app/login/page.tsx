@@ -16,15 +16,19 @@ import { Suspense } from "react";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   
   const error = searchParams?.get("error");
   
   useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
+    if (status === "authenticated" && session) {
+      if ((session.user as any)?.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   useEffect(() => {
     if (error) {
@@ -64,14 +68,8 @@ function LoginContent() {
       if (res?.error) {
         toast.error("Invalid credentials. Please try again.");
       } else {
-        // Check session role and redirect accordingly
-        const session = await getSession();
-        const role = (session?.user as any)?.role;
-        if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/dashboard");
-        }
+        toast.success("Login successful! Redirecting...");
+        router.refresh();
       }
     } catch (err: any) {
       toast.error(err.message || "An error occurred");

@@ -38,7 +38,7 @@ export default withAuth(
     // 4. Maintenance Mode Check (Global)
     try {
       const maintenanceRes = await fetch(`${req.nextUrl.origin}/api/admin/maintenance`, {
-        next: { revalidate: 30 }
+        cache: 'no-store'
       });
       const { maintenanceMode } = await maintenanceRes.json();
 
